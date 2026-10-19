@@ -1,0 +1,109 @@
+{
+  "$schema": "./schema.json",
+  "format": "ttm-song",
+  "version": 1,
+  "title": "Goa Sunrise",
+  "bpm": 142,
+  "key": "E phrygian dominant",
+  "description": "Melodic Goa: a 16th-note arpeggio over E major → F major, a squelchy acid line, the bass stepping E → F in the second drop.",
+  "tracks": [
+    {
+      "id": "kick",
+      "name": "Kick",
+      "instrument": { "kind": "drum", "voice": "kick", "tune": -1 },
+      "patterns": { "a": { "grid": "x...x...x...x..." } }
+    },
+    {
+      "id": "bass",
+      "name": "Bass",
+      "instrument": { "kind": "synth", "preset": "rolling-bass" },
+      "gain": -3,
+      "patterns": {
+        "a": { "grid": ". E1 E1 E1 . E1 E1 E1 . E1 E1 E1 . E1 E1 E1" },
+        "b": { "grid": ". E1 E1 E1 . E1 E1 E1 . E1 E1 E1 . F1 E1 G#1" },
+        "c": {
+          "grid": ". E1 E1 E1 . E1 E1 E1 . E1 E1 E1 . E1 E1 E1 | . F1 F1 F1 . F1 F1 F1 . F1 F1 F1 . G#1 F1 E1"
+        }
+      }
+    },
+    {
+      "id": "closed-hat",
+      "name": "Closed hat",
+      "instrument": { "kind": "drum", "voice": "closed-hat" },
+      "gain": -11,
+      "patterns": { "a": { "grid": "xxXxxxXxxxXxxxXx" } }
+    },
+    {
+      "id": "open-hat",
+      "name": "Open hat",
+      "instrument": { "kind": "drum", "voice": "open-hat" },
+      "gain": -9,
+      "patterns": { "a": { "grid": "..x...x...x...x." } }
+    },
+    {
+      "id": "clap",
+      "name": "Clap",
+      "instrument": { "kind": "drum", "voice": "clap" },
+      "gain": -5,
+      "patterns": { "a": { "grid": "....x.......x..." } }
+    },
+    {
+      "id": "perc",
+      "name": "Perc",
+      "instrument": { "kind": "drum", "voice": "perc", "tune": 5 },
+      "gain": -12,
+      "pan": 0.3,
+      "patterns": { "a": { "grid": "...x..x....x..x." } }
+    },
+    {
+      "id": "arp",
+      "name": "Arp",
+      "instrument": { "kind": "synth", "preset": "pluck", "wave": "sawtooth", "cutoff": 2200 },
+      "gain": -10,
+      "pan": -0.2,
+      "patterns": {
+        "a": {
+          "grid": "E3 B3 E4 B3 G#3 B3 E4 B3 F3 C4 F4 C4 A3 C4 F4 C4 | E3 B3 E4 B3 G#3 B3 E4 B3 D3 A3 D4 A3 F3 A3 D4 A3"
+        }
+      }
+    },
+    {
+      "id": "acid",
+      "name": "Acid",
+      "instrument": { "kind": "synth", "preset": "acid" },
+      "gain": -7,
+      "patterns": {
+        "a": { "grid": "E2 E2! E3~ D3 . E2 G#2 . E2 . F2~ E2 . E2! B2 ." },
+        "b": { "grid": "E2 E2! E3~ D3 . E2 G#2 . E2 . F2~ E2 . E3! F3~ E3" }
+      }
+    },
+    {
+      "id": "pad",
+      "name": "Pad",
+      "instrument": { "kind": "synth", "preset": "pad" },
+      "gain": -12,
+      "patterns": {
+        "a": {
+          "length": 64,
+          "notes": [
+            { "step": 0, "pitch": "E3", "len": 32 },
+            { "step": 0, "pitch": "G#3", "len": 32 },
+            { "step": 0, "pitch": "B3", "len": 32 },
+            { "step": 32, "pitch": "F3", "len": 32 },
+            { "step": 32, "pitch": "A3", "len": 32 },
+            { "step": 32, "pitch": "C4", "len": 32 }
+          ]
+        }
+      }
+    }
+  ],
+  "arrangement": [
+    { "name": "intro", "bars": 16, "play": { "kick": "a", "closed-hat": "a", "perc": "a" } },
+    { "name": "build", "bars": 16, "play": { "kick": "a", "bass": "a", "closed-hat": "a", "open-hat": "a", "perc": "a" } },
+    { "name": "drop", "bars": 32, "play": { "kick": "a", "bass": "b", "closed-hat": "a", "open-hat": "a", "clap": "a", "perc": "a", "acid": "a" } },
+    { "name": "break", "bars": 16, "play": { "pad": "a", "arp": "a" } },
+    { "name": "lift", "bars": 4, "play": { "closed-hat": "a", "arp": "a", "acid": "b" } },
+    { "name": "drop 2", "bars": 32, "play": { "kick": "a", "bass": "c", "closed-hat": "a", "open-hat": "a", "clap": "a", "perc": "a", "acid": "b", "arp": "a", "pad": "a" } },
+    { "name": "outro", "bars": 16, "play": { "kick": "a", "closed-hat": "a", "perc": "a" } }
+  ]
+}
