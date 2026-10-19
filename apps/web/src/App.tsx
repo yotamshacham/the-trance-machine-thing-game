@@ -134,7 +134,22 @@ export function App({ initial }: { initial: Song }) {
         <span>
           {current.bars} bars · {current.bars * STEPS_PER_BAR} steps · click a step to add a note, again to remove it; pick a note first to write or repitch · space plays
         </span>
-        <span>{__APP_VERSION__}</span>
+        <span className="latency">
+          <span title="If the playhead moves before you hear the beat, push it later (+); if after, earlier (−). Kept for this browser.">
+            sync
+            <button className="tiny" onClick={() => engine.setSyncOffset(engine.syncOffset - 10)} aria-label="Playhead earlier">−</button>
+            {engine.syncOffset > 0 ? '+' : ''}
+            {engine.syncOffset} ms
+            <button className="tiny" onClick={() => engine.setSyncOffset(engine.syncOffset + 10)} aria-label="Playhead later">+</button>
+          </span>
+          {engine.latency && (
+            <span title="Audio output latency the browser reports, and how far the playhead is drawn from when that says you hear each step">
+              audio out {Math.round(engine.latency.output * 1000)} ms · playhead {Math.abs(Math.round(engine.latency.picture * 1000))} ms{' '}
+              {engine.latency.picture >= 0 ? 'late' : 'early'}
+            </span>
+          )}
+          <span>{__APP_VERSION__}</span>
+        </span>
       </footer>
     </div>
   );
