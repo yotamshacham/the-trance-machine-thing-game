@@ -217,24 +217,45 @@
                     "const": "sampler"
                   },
                   "sample": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "URL or path of an audio file (e.g. \"/samples/vox-hey.wav\")"
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "description": "Pitch as a note name; C4 is middle C. Psytrance bass usually sits around E1–A1."
+                        },
+                        "additionalProperties": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    ],
+                    "description": "URL or path of an audio file (\"/samples/vox-hey.wav\"), or a multisample: note name → file, each file recorded at that note ({\"E1\": \"…\", \"F1\": \"…\"})"
                   },
                   "root": {
-                    "description": "The pitch the sample was recorded at, default C3",
+                    "description": "The pitch a single sample was recorded at, default C3",
                     "type": "string"
                   },
                   "gate": {
                     "description": "Cut the sample at the note length (default: play it out)",
                     "type": "boolean"
+                  },
+                  "bpm": {
+                    "description": "A loop's own tempo: it's stretched to the song's tempo without changing pitch, and cut at the note length",
+                    "type": "number",
+                    "minimum": 40,
+                    "maximum": 300
                   }
                 },
                 "required": [
                   "kind",
                   "sample"
                 ],
-                "description": "Plays an audio file, repitched by note."
+                "description": "Plays audio files, repitched by note."
               }
             ]
           },

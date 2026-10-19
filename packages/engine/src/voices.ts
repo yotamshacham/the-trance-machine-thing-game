@@ -1,13 +1,16 @@
 // Tone.js nodes for each kind of instrument: the drum machine, the synth, the sampler.
 
 import * as Tone from 'tone';
-import { toMidi, type Instrument, type NoteEvent } from '@ttm/song';
+import { toMidi, type Instrument, type NoteEvent, type SamplerInstrument } from '@ttm/song';
+import { sampleUrl } from './sample-url.ts';
 import { drumSettings, synthSettings, type DrumSettings, type SynthSettings } from './presets.ts';
 
 export interface Voice {
   output: Tone.ToneAudioNode;
   /** play one scheduled note; `seconds` is its length */
   play(e: NoteEvent, time: number, seconds: number): void;
+  /** the song's tempo, for voices that follow it (tempo-synced loops) */
+  setTempo?(bpm: number): void;
   dispose(): void;
 }
 
@@ -18,7 +21,7 @@ export function createVoice(instrument: Instrument): Voice {
     case 'synth':
       return synthVoice(synthSettings(instrument));
     case 'sampler':
-      return samplerVoice(instrument.sample, toMidi(instrument.root ?? 'C3'), instrument.gate ?? false);
+      return instrument.bpm ? loopVoice(instrument) : samplerVoice(instrument);
   }
 }
 
@@ -119,16 +122,48 @@ function synthVoice(s: SynthSettings): Voice {
   };
 }
 
-function samplerVoice(url: string, root: number, gate: boolean): Voice {
-  const sampler = new Tone.Sampler({ urls: { [root]: url } });
+/** One sample repitched, or a multisample (the nearest recorded note repitched). */
+function samplerVoice(instrument: SamplerInstrument): Voice {
+  const urls: Record<string, string> =
+    typeof instrument.sample === 'string'
+      ? { [instrument.root ?? 'C3']: sampleUrl(instrument.sample) }
+      : Object.fromEntries(Object.entries(instrument.sample).map(([note, url]) => [note, sampleUrl(url)]));
+  const sampler = new Tone.Sampler({ urls, release: 0.02, onerror: (e) => console.warn('Sample failed to load', e) });
+  const gate = instrument.gate ?? false;
   return {
     output: sampler,
     play(e, time, seconds) {
-      if (!sampler.loaded) return;
-      const freq = Tone.mtof((e.pitch ?? root) as Tone.Unit.MidiNote);
+      if (!sampler.loaded || e.pitch === null) return;
+      const freq = Tone.mtof(e.pitch as Tone.Unit.MidiNote);
       if (gate) sampler.triggerAttackRelease(freq, seconds, time, e.vel);
       else sampler.triggerAttack(freq, time, e.vel);
     },
     dispose: () => sampler.dispose(),
+  };
+}
+
+/** A loop: stretched from its own tempo to the song's (pitch kept), transposed by note, cut at the note length. */
+function loopVoice(instrument: SamplerInstrument): Voice {
+  const url = typeof instrument.sample === 'string' ? instrument.sample : Object.values(instrument.sample)[0]!;
+  const root = toMidi(instrument.root ?? 'C3');
+  const output = new Tone.Gain(1);
+  const player = new Tone.GrainPlayer({ url: sampleUrl(url), grainSize: 0.08, overlap: 0.04 }).connect(output);
+  let rate = 1;
+  return {
+    output,
+    play(e, time, seconds) {
+      if (!player.loaded || e.pitch === null) return;
+      player.playbackRate = rate;
+      player.detune = (e.pitch - root) * 100;
+      output.gain.setValueAtTime(e.vel, time);
+      player.start(time).stop(time + seconds);
+    },
+    setTempo(bpm) {
+      rate = bpm / instrument.bpm!;
+    },
+    dispose: () => {
+      player.dispose();
+      output.dispose();
+    },
   };
 }
