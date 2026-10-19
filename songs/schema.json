@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string",
+      "const": "ttm-song"
+    },
+    "version": {
+      "type": "number",
+      "const": 1
+    },
+    "title": {
+      "type": "string"
+    },
+    "bpm": {
+      "type": "number",
+      "minimum": 40,
+      "maximum": 300,
+      "description": "Psytrance: 138–148, full-on ~145"
+    },
+    "swing": {
+      "description": "Delay of every off-16th, 0–0.5 of a step",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 0.5
+    },
+    "key": {
+      "description": "Informational, e.g. \"F# phrygian\"",
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "arrangement": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "e.g. \"intro\", \"build\", \"drop\", \"break\""
+          },
+          "bars": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 512
+          },
+          "play": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "description": "Stable identifier, e.g. \"kick\" or \"bass-2\""
+            },
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "description": "Stable identifier, e.g. \"kick\" or \"bass-2\""
+            },
+            "description": "track id → pattern id. Tracks left out are silent. Shorter patterns loop."
+          }
+        },
+        "required": [
+          "name",
+          "bars",
+          "play"
+        ]
+      }
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "description": "Stable identifier, e.g. \"kick\" or \"bass-2\""
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "instrument": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "drum"
+                  },
+                  "voice": {
+                    "type": "string",
+                    "enum": [
+                      "kick",
+                      "clap",
+                      "snare",
+                      "closed-hat",
+                      "open-hat",
+                      "ride",
+                      "perc",
+                      "shaker"
+                    ]
+                  },
+                  "tune": {
+                    "description": "Semitones up or down from the voice default",
+                    "type": "number",
+                    "minimum": -24,
+                    "maximum": 24
+                  },
+                  "decay": {
+                    "description": "Decay multiplier, 1 = default",
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 4
+                  }
+                },
+                "required": [
+                  "kind",
+                  "voice"
+                ],
+                "description": "Drum machine voice, synthesized in the browser. One voice per track."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "synth"
+                  },
+                  "preset": {
+                    "type": "string",
+                    "enum": [
+                      "rolling-bass",
+                      "acid",
+                      "sub",
+                      "pad",
+                      "lead",
+                      "pluck"
+                    ]
+                  },
+                  "wave": {
+                    "type": "string",
+                    "enum": [
+                      "sawtooth",
+                      "square",
+                      "sine",
+                      "triangle"
+                    ]
+                  },
+                  "cutoff": {
+                    "description": "Filter cutoff in Hz",
+                    "type": "number",
+                    "minimum": 20,
+                    "maximum": 20000
+                  },
+                  "resonance": {
+                    "description": "Filter Q",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30
+                  },
+                  "envAmount": {
+                    "description": "Filter envelope sweep in octaves",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 8
+                  },
+                  "attack": {
+                    "description": "Seconds",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  "decay": {
+                    "description": "Seconds",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  "sustain": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "release": {
+                    "description": "Seconds",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  "glide": {
+                    "description": "Portamento seconds for slid notes",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "preset"
+                ],
+                "description": "Subtractive synth. Preset gives the sound; the other fields override it."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "sampler"
+                  },
+                  "sample": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "URL or path of an audio file (e.g. \"/samples/vox-hey.wav\")"
+                  },
+                  "root": {
+                    "description": "The pitch the sample was recorded at, default C3",
+                    "type": "string"
+                  },
+                  "gate": {
+                    "description": "Cut the sample at the note length (default: play it out)",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "sample"
+                ],
+                "description": "Plays an audio file, repitched by note."
+              }
+            ]
+          },
+          "gain": {
+            "description": "dB, default 0",
+            "type": "number",
+            "minimum": -60,
+            "maximum": 12
+          },
+          "pan": {
+            "description": "-1 left … 1 right, default 0",
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "mute": {
+            "type": "boolean"
+          },
+          "patterns": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "description": "Stable identifier, e.g. \"kick\" or \"bass-2\""
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "length": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1024,
+                      "description": "Length in steps (16 = one bar)"
+                    },
+                    "notes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "step": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991,
+                            "description": "Step within the pattern, from 0 (16ths)"
+                          },
+                          "pitch": {
+                            "description": "Omitted on drum tracks; on synth/sampler tracks the default is C3",
+                            "type": "string"
+                          },
+                          "vel": {
+                            "description": "Velocity 0–1, default 0.8 (1 = accent)",
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "len": {
+                            "description": "Length in steps, default 1",
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "slide": {
+                            "description": "Glide into the next note (acid lines)",
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "step"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "length",
+                    "notes"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "grid": {
+                      "type": "string",
+                      "description": "Grid shorthand, one token per 16th step: \"x...x...x...x...\" or \"F#1 F#1 . F#1~ G1 - . .\""
+                    }
+                  },
+                  "required": [
+                    "grid"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "instrument",
+          "patterns"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "version",
+    "title",
+    "bpm",
+    "arrangement",
+    "tracks"
+  ],
+  "title": "Trance Machine song",
+  "description": "A song for the trance machine. See docs/song-format.md."
+}

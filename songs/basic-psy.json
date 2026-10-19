@@ -1,0 +1,87 @@
+{
+  "$schema": "./schema.json",
+  "format": "ttm-song",
+  "version": 1,
+  "title": "Basic Psy",
+  "bpm": 145,
+  "key": "F# phrygian",
+  "description": "The starting template: four-on-the-floor kick, rolling KBBB bass, offbeat hats, a two-bar acid line and a pad for the break.",
+  "tracks": [
+    {
+      "id": "kick",
+      "name": "Kick",
+      "instrument": { "kind": "drum", "voice": "kick" },
+      "patterns": { "a": { "grid": "x...x...x...x..." } }
+    },
+    {
+      "id": "bass",
+      "name": "Bass",
+      "instrument": { "kind": "synth", "preset": "rolling-bass" },
+      "gain": -3,
+      "patterns": {
+        "a": { "grid": ". F#1 F#1 F#1 . F#1 F#1 F#1 . F#1 F#1 F#1 . F#1 F#1 F#1" },
+        "b": { "grid": ". F#1 F#1 F#1 . F#1 F#1 F#1 . F#1 F#1 F#1 . G1 F#1 A1" }
+      }
+    },
+    {
+      "id": "closed-hat",
+      "name": "Closed hat",
+      "instrument": { "kind": "drum", "voice": "closed-hat" },
+      "gain": -9,
+      "patterns": { "a": { "grid": "xx.xxx.xxx.xxx.x" } }
+    },
+    {
+      "id": "open-hat",
+      "name": "Open hat",
+      "instrument": { "kind": "drum", "voice": "open-hat" },
+      "gain": -8,
+      "patterns": { "a": { "grid": "..x...x...x...x." } }
+    },
+    {
+      "id": "clap",
+      "name": "Clap",
+      "instrument": { "kind": "drum", "voice": "clap" },
+      "gain": -4,
+      "patterns": { "a": { "grid": "....x.......x..." } }
+    },
+    {
+      "id": "acid",
+      "name": "Acid",
+      "instrument": { "kind": "synth", "preset": "acid" },
+      "gain": -6,
+      "patterns": {
+        "a": {
+          "grid": "F#2 . F#3~ F#2 . A2 . G2~ F#2 . C#3 . F#2 F#3 . E3 | F#2 . F#3 . G2~ A2 . F#2 . D3~ C#3 . F#2 . G3! ."
+        }
+      }
+    },
+    {
+      "id": "pad",
+      "name": "Pad",
+      "instrument": { "kind": "synth", "preset": "pad" },
+      "gain": -10,
+      "patterns": {
+        "a": {
+          "length": 64,
+          "notes": [
+            { "step": 0, "pitch": "F#3", "len": 32 },
+            { "step": 0, "pitch": "A3", "len": 32 },
+            { "step": 0, "pitch": "C#4", "len": 32 },
+            { "step": 32, "pitch": "E3", "len": 32 },
+            { "step": 32, "pitch": "G3", "len": 32 },
+            { "step": 32, "pitch": "B3", "len": 32 }
+          ]
+        }
+      }
+    }
+  ],
+  "arrangement": [
+    { "name": "intro", "bars": 16, "play": { "kick": "a", "closed-hat": "a" } },
+    { "name": "groove", "bars": 16, "play": { "kick": "a", "bass": "a", "closed-hat": "a", "open-hat": "a", "clap": "a" } },
+    { "name": "build", "bars": 8, "play": { "kick": "a", "bass": "b", "closed-hat": "a", "open-hat": "a", "acid": "a" } },
+    { "name": "drop", "bars": 16, "play": { "kick": "a", "bass": "a", "closed-hat": "a", "open-hat": "a", "clap": "a", "acid": "a" } },
+    { "name": "break", "bars": 16, "play": { "pad": "a", "acid": "a" } },
+    { "name": "drop 2", "bars": 16, "play": { "kick": "a", "bass": "b", "closed-hat": "a", "open-hat": "a", "clap": "a", "acid": "a", "pad": "a" } },
+    { "name": "outro", "bars": 8, "play": { "kick": "a", "closed-hat": "a" } }
+  ]
+}

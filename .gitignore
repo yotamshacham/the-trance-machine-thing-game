@@ -147,3 +147,10 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# --- the trance machine ---
+.wrangler/
+.DS_Store
+# local sample packs (commercial packs can't be redistributed; see docs/samples.md)
+samples/private/
+fixtures/private/
