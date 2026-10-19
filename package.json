@@ -1,0 +1,26 @@
+{
+  "name": "the-trance-machine-thing-game",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "pnpm --filter @ttm/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck && tsc -p scripts",
+    "lint": "oxlint --deny-warnings",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "song": "node scripts/song.ts",
+    "deploy:web": "pnpm --filter @ttm/web run deploy"
+  },
+  "dependencies": {
+    "@ttm/formats": "workspace:*",
+    "@ttm/song": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "oxlint": "^1.81.0",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.148.0"
+  }
+}
