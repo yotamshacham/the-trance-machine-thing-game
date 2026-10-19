@@ -78,11 +78,21 @@ export const SynthInstrument = z
 export const SamplerInstrument = z
   .object({
     kind: z.literal('sampler'),
-    sample: z.string().min(1).describe('URL or path of an audio file (e.g. "/samples/vox-hey.wav")'),
-    root: NoteName.optional().describe('The pitch the sample was recorded at, default C3'),
+    sample: z
+      .union([z.string().min(1), z.record(NoteName, z.string().min(1))])
+      .describe(
+        'URL or path of an audio file ("/samples/vox-hey.wav"), or a multisample: note name → file, each file recorded at that note ({"E1": "…", "F1": "…"})',
+      ),
+    root: NoteName.optional().describe('The pitch a single sample was recorded at, default C3'),
     gate: z.boolean().optional().describe('Cut the sample at the note length (default: play it out)'),
+    bpm: z
+      .number()
+      .min(40)
+      .max(300)
+      .optional()
+      .describe("A loop's own tempo: it's stretched to the song's tempo without changing pitch, and cut at the note length"),
   })
-  .describe('Plays an audio file, repitched by note.');
+  .describe('Plays audio files, repitched by note.');
 
 export const Instrument = z.discriminatedUnion('kind', [DrumInstrument, SynthInstrument, SamplerInstrument]);
 

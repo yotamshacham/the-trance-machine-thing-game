@@ -1,0 +1,241 @@
+{
+  "$schema": "./schema.json",
+  "format": "ttm-song",
+  "version": 1,
+  "title": "Chrome Machine",
+  "bpm": 145,
+  "key": "F# phrygian",
+  "description": "Built from the local Futurephonic bank (docs/samples.md): needs the packs linked in samples/private, and plays only on the dev server. Chrome Bass multisample, a Futurephonic kick and hats, the Echo Chamber lead loop stretched from 135 to 145, plus the acid synth.",
+  "arrangement": [
+    {
+      "name": "intro",
+      "bars": 16,
+      "play": {
+        "kick": "a",
+        "hat": "a",
+        "top": "a"
+      }
+    },
+    {
+      "name": "build",
+      "bars": 16,
+      "play": {
+        "kick": "a",
+        "bass": "a",
+        "hat": "a",
+        "open-hat": "a",
+        "top": "a",
+        "riser": "a"
+      }
+    },
+    {
+      "name": "drop",
+      "bars": 32,
+      "play": {
+        "kick": "a",
+        "bass": "a",
+        "clap": "a",
+        "hat": "a",
+        "open-hat": "a",
+        "top": "a",
+        "lead": "a"
+      }
+    },
+    {
+      "name": "break",
+      "bars": 16,
+      "play": {
+        "pad": "a",
+        "acid": "a"
+      }
+    },
+    {
+      "name": "drop 2",
+      "bars": 32,
+      "play": {
+        "kick": "a",
+        "bass": "b",
+        "clap": "a",
+        "hat": "a",
+        "open-hat": "a",
+        "top": "a",
+        "lead": "a",
+        "acid": "a"
+      }
+    },
+    {
+      "name": "outro",
+      "bars": 16,
+      "play": {
+        "kick": "a",
+        "hat": "a",
+        "top": "a"
+      }
+    }
+  ],
+  "tracks": [
+    {
+      "id": "kick",
+      "name": "Locus Kick",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-fg/Kicks/FP_FG F# Locus Kick.wav"
+      },
+      "patterns": {
+        "a": {
+          "grid": "x...x...x...x..."
+        }
+      }
+    },
+    {
+      "id": "bass",
+      "name": "Chrome Bass",
+      "instrument": {
+        "kind": "sampler",
+        "sample": {
+          "A1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass A.wav",
+          "A#1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass A#.wav",
+          "B1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass B.wav",
+          "C1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass C.wav",
+          "C#1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass C#.wav",
+          "D1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass D.wav",
+          "D#1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass D#.wav",
+          "E1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass E.wav",
+          "F1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass F.wav",
+          "F#1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass F#.wav",
+          "G1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass G.wav",
+          "G#1": "/local-samples/futurephonic-sf/Basses/Chrome Bass/Chrome Bass G#.wav"
+        },
+        "gate": true
+      },
+      "gain": -2,
+      "patterns": {
+        "a": {
+          "grid": ". F#1 F#1 F#1 . F#1 F#1 F#1 . F#1 F#1 F#1 . F#1 F#1 F#1"
+        },
+        "b": {
+          "grid": ". F#1 F#1 F#1 . F#1 F#1 F#1 . F#1 F#1 F#1 . G1 F#1 A1"
+        }
+      }
+    },
+    {
+      "id": "clap",
+      "name": "Crisp Clap",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-sf/Bonen - Major7 - X-Noize - Secret Selection/Bonen - Major7 - X-Noize - Secret Selection/Claps/Crisp Clap.wav"
+      },
+      "gain": -4,
+      "patterns": {
+        "a": {
+          "grid": "....x.......x..."
+        }
+      }
+    },
+    {
+      "id": "hat",
+      "name": "Hat",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-sf/Bonen - Major7 - X-Noize - Secret Selection/Bonen - Major7 - X-Noize - Secret Selection/Hats/CHH Hat 1.wav"
+      },
+      "gain": -10,
+      "patterns": {
+        "a": {
+          "grid": "xx.xxx.xxx.xxx.x"
+        }
+      }
+    },
+    {
+      "id": "open-hat",
+      "name": "Open hat",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-sf/Bonen - Major7 - X-Noize - Secret Selection/Bonen - Major7 - X-Noize - Secret Selection/Hats/OHH Crisp Hat.wav"
+      },
+      "gain": -8,
+      "patterns": {
+        "a": {
+          "grid": "..x...x...x...x."
+        }
+      }
+    },
+    {
+      "id": "top",
+      "name": "Hypnotize top loop",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-fg/Loops/138 Top Loops/FP_FG 138 Hypnotize Top Loop.wav",
+        "gate": true,
+        "bpm": 138
+      },
+      "gain": -9,
+      "patterns": {
+        "a": {
+          "grid": "x---------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------"
+        }
+      }
+    },
+    {
+      "id": "lead",
+      "name": "Echo Chamber",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-fg/Grids & Leads/FP_FG 135 F# Echo Chamber.wav",
+        "root": "F#3",
+        "gate": true,
+        "bpm": 135
+      },
+      "gain": -7,
+      "patterns": {
+        "a": {
+          "grid": "x---------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------"
+        }
+      }
+    },
+    {
+      "id": "pad",
+      "name": "Granular Ceremony",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-fg/Pads Atmos/FP_FG F# Granular Ceremony.wav",
+        "root": "F#3",
+        "gate": true
+      },
+      "gain": -8,
+      "patterns": {
+        "a": {
+          "grid": "x---------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------"
+        }
+      }
+    },
+    {
+      "id": "riser",
+      "name": "Axis Rising",
+      "instrument": {
+        "kind": "sampler",
+        "sample": "/local-samples/futurephonic-fg/Build & Tension/FP_FG Axis Rising.wav"
+      },
+      "gain": -8,
+      "patterns": {
+        "a": {
+          "grid": "x...............|................|................|................|................|................|................|................|................|................|................|................|................|................|................|................"
+        }
+      }
+    },
+    {
+      "id": "acid",
+      "name": "Acid (synth)",
+      "instrument": {
+        "kind": "synth",
+        "preset": "acid"
+      },
+      "gain": -9,
+      "patterns": {
+        "a": {
+          "grid": "F#2 . F#3~ F#2 . A2 . G2~ F#2 . C#3 . F#2 F#3 . E3"
+        }
+      }
+    }
+  ]
+}

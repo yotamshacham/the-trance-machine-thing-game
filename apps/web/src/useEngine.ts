@@ -3,7 +3,7 @@
 
 import { Engine } from '@ttm/engine';
 import { useEffect, useRef, useState } from 'react';
-import type { Section, Song } from '@ttm/song';
+import { defaultPitchOf, toMidi, type Section, type Song } from '@ttm/song';
 
 export function useEngine(song: Song, loop: Section[] | undefined) {
   const engine = useRef<Engine | null>(null);
@@ -20,8 +20,20 @@ export function useEngine(song: Song, loop: Section[] | undefined) {
     };
   }, []);
 
+  // a track whose new sound should be heard as soon as it's loaded
+  const audition = useRef<string | null>(null);
+
   useEffect(() => {
-    engine.current?.setSong(song, loop);
+    const e = engine.current;
+    if (!e) return;
+    e.setSong(song, loop);
+    const trackId = audition.current;
+    audition.current = null;
+    const track = song.tracks.find((t) => t.id === trackId);
+    if (track && !e.playing) {
+      const pitch = track.instrument.kind === 'drum' ? null : toMidi(defaultPitchOf(track.instrument));
+      void e.loaded().then(() => e.preview(track.id, pitch));
+    }
   }, [song, loop]);
 
   return {
@@ -41,5 +53,10 @@ export function useEngine(song: Song, loop: Section[] | undefined) {
       engine.current?.preview(trackId, pitch);
     },
     setSolo: (trackId: string, on: boolean) => engine.current?.setSolo(trackId, on),
+    /** play this track's sound once the change about to be made has loaded */
+    audition(trackId: string) {
+      audition.current = trackId;
+      void Engine.unlock();
+    },
   };
 }

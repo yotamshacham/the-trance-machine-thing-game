@@ -66,6 +66,7 @@ export class Engine {
       strip.channel.pan.value = track.pan ?? 0;
       strip.channel.mute = track.mute ?? false;
       strip.channel.solo = this.solo.has(track.id);
+      strip.voice.setTempo?.(song.bpm);
     }
 
     const { events, length } = sections ? scheduleSections(song, sections) : schedule(song);
@@ -104,6 +105,15 @@ export class Engine {
     if (!strip || !this.song) return;
     const e: NoteEvent = { step: 0, trackId, pitch, vel: 0.8, len: 1, slideIn: false, slideOut: false };
     strip.voice.play(e, Tone.now() + 0.01, stepSeconds(this.song.bpm) * 2);
+  }
+
+  /** Resolves once every sample asked for so far has loaded (or failed). */
+  async loaded(): Promise<void> {
+    try {
+      await Tone.loaded();
+    } catch {
+      // a missing sample is a silent track, not a broken engine
+    }
   }
 
   dispose(): void {
