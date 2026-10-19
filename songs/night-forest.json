@@ -1,0 +1,102 @@
+{
+  "$schema": "./schema.json",
+  "format": "ttm-song",
+  "version": 1,
+  "title": "Night Forest",
+  "bpm": 152,
+  "swing": 0.06,
+  "key": "A phrygian",
+  "description": "Dark forest: fast, a low dark bass with the phrygian A → Bb rub, tuned percussion, a resonant acid squelch and eerie long lead notes. One bar without the kick before the second drop.",
+  "tracks": [
+    {
+      "id": "kick",
+      "name": "Kick",
+      "instrument": { "kind": "drum", "voice": "kick", "decay": 0.8 },
+      "patterns": { "a": { "grid": "x...x...x...x..." } }
+    },
+    {
+      "id": "bass",
+      "name": "Bass",
+      "instrument": { "kind": "synth", "preset": "rolling-bass", "cutoff": 90, "resonance": 6 },
+      "gain": -3,
+      "patterns": {
+        "a": { "grid": ". A1 A1 A1 . A1 A1 A1 . A1 A1 A1 . A1 A1 A1" },
+        "b": { "grid": ". A1 A1 A1 . A1 A1 A1 . A1 A1 A1 . A#1 A1 A1" }
+      }
+    },
+    {
+      "id": "closed-hat",
+      "name": "Closed hat",
+      "instrument": { "kind": "drum", "voice": "closed-hat", "tune": 2 },
+      "gain": -12,
+      "patterns": { "a": { "grid": "x.xxx.xxx.xxx.xx" } }
+    },
+    {
+      "id": "shaker",
+      "name": "Shaker",
+      "instrument": { "kind": "drum", "voice": "shaker" },
+      "gain": -14,
+      "pan": -0.4,
+      "patterns": { "a": { "grid": ".x.x.x.x.x.x.x.x" } }
+    },
+    {
+      "id": "ride",
+      "name": "Ride",
+      "instrument": { "kind": "drum", "voice": "ride", "decay": 0.6 },
+      "gain": -15,
+      "pan": 0.3,
+      "patterns": { "a": { "grid": "..x...x...x...x." } }
+    },
+    {
+      "id": "snare",
+      "name": "Snare",
+      "instrument": { "kind": "drum", "voice": "snare" },
+      "gain": -6,
+      "patterns": {
+        "a": { "grid": "....x.......x..." },
+        "fill": { "grid": "....x.......x... | ....x.......x... | ....x.......x... | ....x...x.x.XxXX" }
+      }
+    },
+    {
+      "id": "perc",
+      "name": "Perc",
+      "instrument": { "kind": "drum", "voice": "perc", "tune": 7, "decay": 0.7 },
+      "gain": -11,
+      "pan": 0.4,
+      "patterns": {
+        "a": { "grid": "..x..x.x...x..x." },
+        "b": { "grid": "..x..x.x...x..x. | .x...x.x..x..xX." }
+      }
+    },
+    {
+      "id": "acid",
+      "name": "Acid",
+      "instrument": { "kind": "synth", "preset": "acid", "cutoff": 150, "resonance": 20 },
+      "gain": -8,
+      "patterns": {
+        "a": { "grid": "A1 . A2~ A1 A#1 . A1 . A2! . A1 A1 . G2~ A1 ." },
+        "b": { "grid": "A1 . A2~ A1 A#1 . A1 . A2! . A1 A1 . G2~ A1 . | A1 . A2~ A1 A#1 . C3! . A2 . A#2~ A2 . E2 F2~ E2" }
+      }
+    },
+    {
+      "id": "lead",
+      "name": "Lead",
+      "instrument": { "kind": "synth", "preset": "lead", "cutoff": 1800, "attack": 0.08, "release": 0.8 },
+      "gain": -14,
+      "pan": -0.15,
+      "patterns": {
+        "a": { "grid": "A3 - - - - - A#3 - - - - - E4 - - - | D4 - - - - - - - C4 - - - A#3 - - -" }
+      }
+    }
+  ],
+  "arrangement": [
+    { "name": "intro", "bars": 16, "play": { "kick": "a", "closed-hat": "a", "shaker": "a" } },
+    { "name": "groove", "bars": 16, "play": { "kick": "a", "bass": "a", "closed-hat": "a", "shaker": "a", "ride": "a", "perc": "a" } },
+    { "name": "drop", "bars": 32, "play": { "kick": "a", "bass": "a", "closed-hat": "a", "shaker": "a", "ride": "a", "snare": "a", "perc": "a", "acid": "a" } },
+    { "name": "break", "bars": 16, "play": { "shaker": "a", "lead": "a", "acid": "b" } },
+    { "name": "build", "bars": 4, "play": { "kick": "a", "bass": "b", "closed-hat": "a", "snare": "fill", "acid": "b" } },
+    { "name": "gap", "bars": 1, "play": { "acid": "b", "shaker": "a" } },
+    { "name": "drop 2", "bars": 32, "play": { "kick": "a", "bass": "b", "closed-hat": "a", "shaker": "a", "ride": "a", "snare": "a", "perc": "b", "acid": "b", "lead": "a" } },
+    { "name": "outro", "bars": 16, "play": { "kick": "a", "closed-hat": "a", "shaker": "a", "ride": "a" } }
+  ]
+}
