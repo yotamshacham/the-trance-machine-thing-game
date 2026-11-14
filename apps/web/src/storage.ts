@@ -60,3 +60,29 @@ export function saveLinkedFile(file: string | undefined): void {
     // not kept this time
   }
 }
+
+const FOLDS_KEY = 'ttm.folds';
+
+/** What's folded in the editor, on this browser: groups by part, tracks by id. Tracks start folded. */
+export interface Folds {
+  groups: string[];
+  /** tracks unfolded: the exception, since tracks start folded */
+  openTracks: string[];
+}
+
+export function loadFolds(): Folds {
+  try {
+    const f = JSON.parse(localStorage.getItem(FOLDS_KEY) ?? '{}') as Partial<Folds>;
+    return { groups: f.groups ?? [], openTracks: f.openTracks ?? [] };
+  } catch {
+    return { groups: [], openTracks: [] };
+  }
+}
+
+export function saveFolds(folds: Folds): void {
+  try {
+    localStorage.setItem(FOLDS_KEY, JSON.stringify(folds));
+  } catch {
+    // not kept this time
+  }
+}

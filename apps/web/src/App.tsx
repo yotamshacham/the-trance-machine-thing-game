@@ -6,11 +6,13 @@ import { Arrangement } from './components/Arrangement.tsx';
 import { Header, type LoopMode } from './components/Header.tsx';
 import { TrackRow } from './components/TrackRow.tsx';
 import { initialState, reducer } from './state.ts';
-import { save } from './storage.ts';
+import { loadFolds, save, saveFolds, type Folds } from './storage.ts';
 import { useEngine } from './useEngine.ts';
 import { useLocalSong } from './useLocalSong.ts';
 import { useRequests } from './requests.ts';
 import { Requests } from './components/Requests.tsx';
+import { TrackGroup } from './components/TrackGroup.tsx';
+import { groupTracks } from './groups.ts';
 
 export function App({ initial }: { initial: Song }) {
   const [state, dispatch] = useReducer(reducer, initial, initialState);
@@ -20,6 +22,14 @@ export function App({ initial }: { initial: Song }) {
   const [pens, setPens] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>();
   const [banks, setBanks] = useState<Bank[]>([]);
+  const [folds, setFoldsState] = useState<Folds>(loadFolds);
+  const setFolds = (change: (f: Folds) => Folds) =>
+    setFoldsState((f) => {
+      const next = change(f);
+      saveFolds(next);
+      return next;
+    });
+  const toggle = (list: string[], id: string, on: boolean) => (on ? [...new Set([...list, id])] : list.filter((x) => x !== id));
 
   useEffect(() => {
     void loadBanks().then(setBanks);
@@ -111,36 +121,48 @@ export function App({ initial }: { initial: Song }) {
       <Requests requests={requests} />
       <Arrangement song={song} selected={section} playingSection={playingSection} dispatch={dispatch} ask={ask} />
       <main className="tracks">
-        {song.tracks.map((track) => {
-          const patternId = current.play[track.id];
-          const pattern = patternId ? track.patterns[patternId] : undefined;
-          const playing = pattern && playingSection === section && stepInSection >= 0 ? stepInSection % pattern.length : -1;
-          return (
-            <TrackRow
-              key={track.id}
-              track={track}
-              patternId={patternId}
-              playing={playing}
-              solo={solo.has(track.id)}
-              pen={penFor(track.id)}
-              dispatch={dispatch}
-              onSolo={(on) => {
-                engine.setSolo(track.id, on);
-                setSolo((s) => {
-                  const next = new Set(s);
-                  if (on) next.add(track.id);
-                  else next.delete(track.id);
-                  return next;
-                });
-              }}
-              onPen={(pitch) => setPens((p) => ({ ...p, [track.id]: pitch }))}
-              onPreview={(pitch) => void engine.preview(track.id, pitch)}
-              onAudition={() => engine.audition(track.id)}
-              banks={banks}
-              ask={ask}
-            />
-          );
-        })}
+        {groupTracks(song.tracks, banks).map((group) => (
+          <TrackGroup
+            key={group.id}
+            name={group.name}
+            count={group.tracks.length}
+            folded={folds.groups.includes(group.id)}
+            onFold={(on) => setFolds((f) => ({ ...f, groups: toggle(f.groups, group.id, on) }))}
+          >
+            {group.tracks.map((track) => {
+              const patternId = current.play[track.id];
+              const pattern = patternId ? track.patterns[patternId] : undefined;
+              const playing = pattern && playingSection === section && stepInSection >= 0 ? stepInSection % pattern.length : -1;
+              return (
+                <TrackRow
+                  key={track.id}
+                  track={track}
+                  patternId={patternId}
+                  playing={playing}
+                  solo={solo.has(track.id)}
+                  pen={penFor(track.id)}
+                  dispatch={dispatch}
+                  onSolo={(on) => {
+                    engine.setSolo(track.id, on);
+                    setSolo((s) => {
+                      const next = new Set(s);
+                      if (on) next.add(track.id);
+                      else next.delete(track.id);
+                      return next;
+                    });
+                  }}
+                  onPen={(pitch) => setPens((p) => ({ ...p, [track.id]: pitch }))}
+                  onPreview={(pitch) => void engine.preview(track.id, pitch)}
+                  onAudition={() => engine.audition(track.id)}
+                  banks={banks}
+                  ask={ask}
+                  folded={!folds.openTracks.includes(track.id)}
+                  onFold={(on) => setFolds((f) => ({ ...f, openTracks: toggle(f.openTracks, track.id, !on) }))}
+                />
+              );
+            })}
+          </TrackGroup>
+        ))}
         <AddTrack banks={banks} dispatch={dispatch} />
       </main>
       <footer className="footer">
