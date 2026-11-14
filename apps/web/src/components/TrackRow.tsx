@@ -2,6 +2,8 @@ import { noteName, toMidi, type Track } from '@ttm/song';
 import { findSound, type Bank } from '../bank.ts';
 import { PEN_PITCHES, soundFor, soundGroups, soundKey } from '../instruments.ts';
 import type { Action } from '../state.ts';
+import type { Ask } from '../requests.ts';
+import { AskClaude } from './AskClaude.tsx';
 import { SoundSelect } from './SoundSelect.tsx';
 import { StepGrid } from './StepGrid.tsx';
 
@@ -19,9 +21,11 @@ interface Props {
   onPreview(pitch: number | null): void;
   /** play the track's sound once it has loaded (after it was changed) */
   onAudition(): void;
+  /** send a request about this track to the agent (only with a linked song) */
+  ask: Ask | undefined;
 }
 
-export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch, onSolo, onPen, onPreview, onAudition }: Props) {
+export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch, onSolo, onPen, onPreview, onAudition, ask }: Props) {
   const pattern = patternId ? track.patterns[patternId] : undefined;
   const drum = track.instrument.kind === 'drum';
   const update = (change: Partial<Omit<Track, 'id' | 'patterns'>>) => dispatch({ type: 'update-track', trackId: track.id, change });
@@ -137,6 +141,11 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
                 {semitones === -12 ? '−oct' : semitones === -1 ? '−1' : semitones === 1 ? '+1' : '+oct'}
               </button>
             ))}
+          </div>
+        )}
+        {ask && (
+          <div className="track-line">
+            <AskClaude ask={ask} target={{ kind: 'track', trackId: track.id, name: track.name }} about={track.name} />
           </div>
         )}
       </div>

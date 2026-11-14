@@ -9,6 +9,8 @@ import { initialState, reducer } from './state.ts';
 import { save } from './storage.ts';
 import { useEngine } from './useEngine.ts';
 import { useLocalSong } from './useLocalSong.ts';
+import { useRequests } from './requests.ts';
+import { Requests } from './components/Requests.tsx';
 
 export function App({ initial }: { initial: Song }) {
   const [state, dispatch] = useReducer(reducer, initial, initialState);
@@ -27,6 +29,7 @@ export function App({ initial }: { initial: Song }) {
   const loop = useMemo(() => (loopMode === 'section' ? [current] : undefined), [loopMode, current]);
   const engine = useEngine(song, loop);
   const local = useLocalSong(song, dispatch, setError);
+  const { requests, ask } = useRequests(local.linked);
 
   // where the playhead is: which section, and how far into it
   const { starts } = useMemo(() => sectionStarts(song), [song]);
@@ -97,6 +100,7 @@ export function App({ initial }: { initial: Song }) {
         onOpenLocal={local.open}
         onSaveToProject={() => void local.saveToProject()}
         onUnlink={local.unlink}
+        ask={ask}
       />
       {error && (
         <div className="error" role="alert">
@@ -104,7 +108,8 @@ export function App({ initial }: { initial: Song }) {
           <button className="icon" onClick={() => setError(undefined)} aria-label="Dismiss">×</button>
         </div>
       )}
-      <Arrangement song={song} selected={section} playingSection={playingSection} dispatch={dispatch} />
+      <Requests requests={requests} />
+      <Arrangement song={song} selected={section} playingSection={playingSection} dispatch={dispatch} ask={ask} />
       <main className="tracks">
         {song.tracks.map((track) => {
           const patternId = current.play[track.id];
@@ -132,6 +137,7 @@ export function App({ initial }: { initial: Song }) {
               onPreview={(pitch) => void engine.preview(track.id, pitch)}
               onAudition={() => engine.audition(track.id)}
               banks={banks}
+              ask={ask}
             />
           );
         })}
