@@ -8,6 +8,13 @@ In this repo, ask Claude Code (or any agent) for a track. It reads `docs/song-fo
 The dev server picks the file up; it's in the app's Songs menu. To have an agent change what you
 made in the browser, Save the song into `songs/` and point the agent at it.
 
+### Live, while the app plays: `songs/local/`
+On the dev server, **Save to project** writes the song to `songs/local/<name>.json` (gitignored)
+and keeps the two in step: edits in the app are written to the file, and when an agent edits the
+file the app reloads it, while playing, as one undoable edit. Files there also show in the Songs menu
+under *songs/local*. Use it for anything that can't be committed (songs from game rips, songs
+using local sample banks); an agent writes there directly and runs `pnpm song check` on it.
+
 `pnpm song import <file.mid>` turns a MIDI file (a game soundtrack, a sketch) into a song an
 agent can then rework.
 

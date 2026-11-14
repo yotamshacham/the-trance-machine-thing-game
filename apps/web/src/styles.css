@@ -394,3 +394,9 @@ button.tiny {
   font-size: 12px;
   line-height: 16px;
 }
+
+.linked {
+  color: var(--teal);
+  font-size: 13px;
+  white-space: nowrap;
+}

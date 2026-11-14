@@ -6,6 +6,7 @@
 - Tracker UI: sections, per-track patterns, step grid, mute/solo/volume, undo, autosave.
 - MIDI import (GM drums mapped, 16th quantize, 4-bar sections deduped into patterns) and export.
 - `songs/basic-psy.json` template; Goa Sunrise and Night Forest examples.
+- `songs/local/` (dev server): the app and an agent edit the same file live; agent edits load while playing.
 - Local sample banks (Futurephonic: 796 sounds, multisampled basses, tempo-synced loops), dev server only.
 
 ## Next

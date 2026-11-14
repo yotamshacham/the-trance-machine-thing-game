@@ -64,4 +64,19 @@ describe('editor state', () => {
   it('keeps bpm in range', () => {
     expect(reducer(start(), { type: 'set-bpm', bpm: 9999 }).song.bpm).toBe(300);
   });
+
+  it('reloading the song from its file keeps the section being edited, and undoes', () => {
+    const s = run(start(), { type: 'add-section' }, { type: 'add-section' });
+    expect(s.section).toBe(2);
+    const changed = { ...s.song, title: 'Changed on disk' };
+    const reloaded = reducer(s, { type: 'reload', song: changed });
+    expect(reloaded.section).toBe(2);
+    expect(reloaded.song.title).toBe('Changed on disk');
+    expect(reducer(reloaded, { type: 'undo' }).song).toEqual(s.song);
+  });
+
+  it('reloading keeps the section in range when the file has fewer', () => {
+    const s = run(start(), { type: 'add-section' }, { type: 'add-section' });
+    expect(reducer(s, { type: 'reload', song: start().song }).section).toBe(0);
+  });
 });

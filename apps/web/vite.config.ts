@@ -4,6 +4,7 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { futurephonic } from './dev/futurephonic.ts';
 import { localSamples } from './dev/localSamples.ts';
+import { localSongs } from './dev/localSongs.ts';
 import { songsFolder } from './dev/songsFolder.ts';
 
 /** v0.1.<commits>: it goes up with every commit; "+" when built from uncommitted changes. */
@@ -24,6 +25,8 @@ export default defineConfig({
     // sample packs on this computer, for the dev server only (docs/samples.md)
     localSamples(fileURLToPath(new URL('../../samples/private', import.meta.url)), [futurephonic]),
     songsFolder(fileURLToPath(new URL('../../songs', import.meta.url))),
+    // songs/local/: gitignored, where the app and an agent hand a song back and forth
+    localSongs(fileURLToPath(new URL('../../songs/local', import.meta.url))),
   ],
   build: { chunkSizeWarningLimit: 1000 }, // Tone.js is most of it
   server: {

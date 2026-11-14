@@ -40,3 +40,23 @@ export function save(song: Song): void {
     // not kept this time
   }
 }
+
+const LINK_KEY = 'ttm.localFile';
+
+/** The songs/local file the song in this browser is kept in step with, if any. */
+export function loadLinkedFile(): string | undefined {
+  try {
+    return localStorage.getItem(LINK_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function saveLinkedFile(file: string | undefined): void {
+  try {
+    if (file) localStorage.setItem(LINK_KEY, file);
+    else localStorage.removeItem(LINK_KEY);
+  } catch {
+    // not kept this time
+  }
+}
