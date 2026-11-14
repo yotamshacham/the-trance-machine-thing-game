@@ -154,3 +154,5 @@ vite.config.ts.timestamp-*
 # local sample packs (commercial packs can't be redistributed; see docs/samples.md)
 samples/private/
 fixtures/private/
+# songs saved from the app on this computer (dev server): may hold material we can't publish
+songs/local/

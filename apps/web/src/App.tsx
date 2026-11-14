@@ -8,6 +8,7 @@ import { TrackRow } from './components/TrackRow.tsx';
 import { initialState, reducer } from './state.ts';
 import { save } from './storage.ts';
 import { useEngine } from './useEngine.ts';
+import { useLocalSong } from './useLocalSong.ts';
 
 export function App({ initial }: { initial: Song }) {
   const [state, dispatch] = useReducer(reducer, initial, initialState);
@@ -25,6 +26,7 @@ export function App({ initial }: { initial: Song }) {
   const current = song.arrangement[section]!;
   const loop = useMemo(() => (loopMode === 'section' ? [current] : undefined), [loopMode, current]);
   const engine = useEngine(song, loop);
+  const local = useLocalSong(song, dispatch, setError);
 
   // where the playhead is: which section, and how far into it
   const { starts } = useMemo(() => sectionStarts(song), [song]);
@@ -90,6 +92,11 @@ export function App({ initial }: { initial: Song }) {
         onStop={engine.stop}
         onLoopMode={setLoopMode}
         onError={setError}
+        localSongs={local.songs}
+        linked={local.linked}
+        onOpenLocal={local.open}
+        onSaveToProject={() => void local.saveToProject()}
+        onUnlink={local.unlink}
       />
       {error && (
         <div className="error" role="alert">

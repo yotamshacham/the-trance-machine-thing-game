@@ -30,6 +30,8 @@ export interface EditorState {
 
 export type Action =
   | { type: 'load'; song: Song }
+  /** the same song, changed elsewhere (its file edited on disk): stay on the section being edited */
+  | { type: 'reload'; song: Song }
   | { type: 'select-section'; index: number }
   | { type: 'set-bpm'; bpm: number }
   | { type: 'set-title'; title: string }
@@ -68,6 +70,8 @@ export function reducer(state: EditorState, action: Action): EditorState {
   switch (action.type) {
     case 'load':
       return edit(action.song, 0);
+    case 'reload':
+      return edit(action.song);
     case 'select-section':
       return { ...state, section: Math.max(0, Math.min(action.index, song.arrangement.length - 1)) };
     case 'set-bpm':
