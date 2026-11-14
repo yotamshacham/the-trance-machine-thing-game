@@ -80,7 +80,9 @@ function synthVoice(s: SynthSettings): Voice {
 
   if (s.mono) {
     const output = new Tone.Gain(1);
-    const synth = new Tone.MonoSynth(options).connect(output);
+    // grit after the filter, when the preset asks for it
+    const drive = s.drive > 0 ? new Tone.Distortion({ distortion: s.drive, oversample: '2x' }).connect(output) : undefined;
+    const synth = new Tone.MonoSynth(options).connect(drive ?? output);
     const layers: (Tone.MonoSynth | Tone.Synth)[] = [synth];
     if (s.sub > 0) {
       const sub = new Tone.Synth({
@@ -100,6 +102,10 @@ function synthVoice(s: SynthSettings): Voice {
             layer.setNote(freq, time);
           } else {
             layer.portamento = 0;
+            // an accent opens the filter further (set as the note is scheduled, a little ahead)
+            if (layer instanceof Tone.MonoSynth && s.accent > 0) {
+              layer.filterEnvelope.octaves = s.envAmount + s.accent * Math.max(0, (e.vel - 0.75) / 0.25);
+            }
             layer.triggerAttack(freq, time, e.vel);
           }
           if (!e.slideOut) layer.triggerRelease(time + seconds);
@@ -107,6 +113,7 @@ function synthVoice(s: SynthSettings): Voice {
       },
       dispose: () => {
         for (const layer of layers) layer.dispose();
+        drive?.dispose();
         output.dispose();
       },
     };

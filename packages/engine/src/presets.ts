@@ -26,26 +26,31 @@ export interface SynthSettings {
   filterDecay: number;
   /** level of a sine at the same pitch under the oscillator, for low-end weight (0 = none) */
   sub: number;
+  /** saturation after the filter, 0–1 (0 = clean): grit for acid */
+  drive: number;
+  /** how much an accent (velocity 1) opens the filter further, in octaves: the acid squelch */
+  accent: number;
   glide: number;
 }
 
 export const SYNTH_PRESETS: Record<SynthPreset, SynthSettings> = {
   // short, plucky 16ths that sit between the kicks
   // a full 16th of body, a fast filter pluck on top, a sine underneath for weight
-  'rolling-bass': { mono: true, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 110, resonance: 3, envAmount: 4, attack: 0.002, decay: 0.12, sustain: 0.55, release: 0.025, filterDecay: 0.07, sub: 0.7, glide: 0.04 },
-  acid: { mono: true, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 220, resonance: 14, envAmount: 4, attack: 0.002, decay: 0.25, sustain: 0.35, release: 0.05, filterDecay: 0.2, sub: 0, glide: 0.06 },
-  sub: { mono: true, wave: 'sine', fat: false, voices: 3, spread: 24, cutoff: 400, resonance: 0.5, envAmount: 0, attack: 0.005, decay: 0.2, sustain: 0.9, release: 0.08, filterDecay: 0.2, sub: 0, glide: 0.05 },
-  pad: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 1400, resonance: 1, envAmount: 0.5, attack: 1.2, decay: 1, sustain: 0.7, release: 2.5, filterDecay: 1, sub: 0, glide: 0 },
-  lead: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 2600, resonance: 3, envAmount: 1.5, attack: 0.01, decay: 0.25, sustain: 0.6, release: 0.3, filterDecay: 0.25, sub: 0, glide: 0 },
+  'rolling-bass': { mono: true, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 110, resonance: 3, envAmount: 4, attack: 0.002, decay: 0.12, sustain: 0.55, release: 0.025, filterDecay: 0.07, sub: 0.7, drive: 0, accent: 0, glide: 0.04 },
+  // a 303-ish line: a resonant filter that snaps shut, opened further by accents, then some grit
+  acid: { mono: true, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 280, resonance: 8, envAmount: 3, attack: 0.002, decay: 0.2, sustain: 0.25, release: 0.04, filterDecay: 0.16, sub: 0, drive: 0.4, accent: 1.5, glide: 0.07 },
+  sub: { mono: true, wave: 'sine', fat: false, voices: 3, spread: 24, cutoff: 400, resonance: 0.5, envAmount: 0, attack: 0.005, decay: 0.2, sustain: 0.9, release: 0.08, filterDecay: 0.2, sub: 0, drive: 0, accent: 0, glide: 0.05 },
+  pad: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 1400, resonance: 1, envAmount: 0.5, attack: 1.2, decay: 1, sustain: 0.7, release: 2.5, filterDecay: 1, sub: 0, drive: 0, accent: 0, glide: 0 },
+  lead: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 2600, resonance: 3, envAmount: 1.5, attack: 0.01, decay: 0.25, sustain: 0.6, release: 0.3, filterDecay: 0.25, sub: 0, drive: 0, accent: 0, glide: 0 },
   // a wide, bright lead: seven detuned saws
-  supersaw: { mono: false, wave: 'sawtooth', fat: true, voices: 7, spread: 45, cutoff: 5000, resonance: 1, envAmount: 1, attack: 0.005, decay: 0.3, sustain: 0.7, release: 0.35, filterDecay: 0.3, sub: 0, glide: 0 },
+  supersaw: { mono: false, wave: 'sawtooth', fat: true, voices: 7, spread: 45, cutoff: 5000, resonance: 1, envAmount: 1, attack: 0.005, decay: 0.3, sustain: 0.7, release: 0.35, filterDecay: 0.3, sub: 0, drive: 0, accent: 0, glide: 0 },
   // short and squelchy, for 16th-note lines: a resonant filter snapping shut
-  'psy-pluck': { mono: false, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 900, resonance: 6, envAmount: 3.5, attack: 0.001, decay: 0.14, sustain: 0, release: 0.12, filterDecay: 0.12, sub: 0, glide: 0 },
+  'psy-pluck': { mono: false, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 900, resonance: 6, envAmount: 3.5, attack: 0.001, decay: 0.14, sustain: 0, release: 0.12, filterDecay: 0.12, sub: 0, drive: 0, accent: 0, glide: 0 },
   // the NES pulse, thickened a touch
-  'square-lead': { mono: false, wave: 'square', fat: true, voices: 2, spread: 8, cutoff: 4000, resonance: 1, envAmount: 0.5, attack: 0.003, decay: 0.1, sustain: 0.8, release: 0.08, filterDecay: 0.1, sub: 0, glide: 0 },
+  'square-lead': { mono: false, wave: 'square', fat: true, voices: 2, spread: 8, cutoff: 4000, resonance: 1, envAmount: 0.5, attack: 0.003, decay: 0.1, sustain: 0.8, release: 0.08, filterDecay: 0.1, sub: 0, drive: 0, accent: 0, glide: 0 },
   // a slower, darker saw for breakdowns
-  'soft-saw': { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 20, cutoff: 1500, resonance: 0.7, envAmount: 0.8, attack: 0.04, decay: 0.4, sustain: 0.6, release: 0.6, filterDecay: 0.4, sub: 0, glide: 0 },
-  pluck: { mono: false, wave: 'square', fat: false, voices: 3, spread: 24, cutoff: 1800, resonance: 2, envAmount: 2, attack: 0.002, decay: 0.22, sustain: 0, release: 0.2, filterDecay: 0.22, sub: 0, glide: 0 },
+  'soft-saw': { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 20, cutoff: 1500, resonance: 0.7, envAmount: 0.8, attack: 0.04, decay: 0.4, sustain: 0.6, release: 0.6, filterDecay: 0.4, sub: 0, drive: 0, accent: 0, glide: 0 },
+  pluck: { mono: false, wave: 'square', fat: false, voices: 3, spread: 24, cutoff: 1800, resonance: 2, envAmount: 2, attack: 0.002, decay: 0.22, sustain: 0, release: 0.2, filterDecay: 0.22, sub: 0, drive: 0, accent: 0, glide: 0 },
 };
 
 /** A preset with the instrument's own overrides on top. */
@@ -60,6 +65,8 @@ export function synthSettings(instrument: SynthInstrument): SynthSettings {
     spread: base.spread,
     filterDecay: base.filterDecay,
     sub: base.sub,
+    drive: base.drive,
+    accent: base.accent,
     wave: pick('wave'),
     cutoff: pick('cutoff'),
     resonance: pick('resonance'),

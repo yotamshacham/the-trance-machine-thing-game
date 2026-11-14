@@ -595,3 +595,28 @@ button.icon.fold {
   padding: 0;
   accent-color: var(--teal);
 }
+
+/* folded: the whole pattern as one thin strip, bars side by side, no note names */
+.track.folded {
+  align-items: center;
+}
+
+.track.folded .grid {
+  flex-direction: row;
+  gap: 4px;
+}
+
+.track.folded .bar {
+  flex: 1;
+  gap: 1px;
+}
+
+.track.folded .cell {
+  height: 16px;
+  font-size: 0;
+  border-radius: 2px;
+}
+
+.track.folded .silent {
+  font-size: 12px;
+}
