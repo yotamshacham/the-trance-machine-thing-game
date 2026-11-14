@@ -44,11 +44,8 @@ A track's volume dipping each time the ducking track (the kick, by default) hits
 _Avoid_: sidechain (the studio technique it imitates), pump
 
 **Fill**:
-A short break that announces what comes next, played by a track in the fills group, often replacing the kick and bass while it plays.
+A short break that announces what comes next, usually the last bar of 8: the kick and bass change, and a track in the fills group plays.
 
-**Cut**:
-The tracks a track replaces: they are silent while it plays a note.
-_Avoid_: choke, mute group
 
 **Patch**:
 A synth's settings beyond its preset: oscillator stack, filter, envelopes, extras and LFOs.

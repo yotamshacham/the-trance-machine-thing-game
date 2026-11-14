@@ -80,8 +80,7 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
 ## Fills
 Fills are ordinary tracks, usually in the `fills` group:
 - `"group": "fills"` puts a track in the editor's Fills group (any lowercase name makes a group of its own).
-- `"cut": ["kick", "bass"]`: the tracks this one **replaces**. They're silent while it plays a note;
-  everything else keeps playing. A muted track cuts nothing; each id must name a track.
+- The kick and bass make room for a fill in their own patterns: an empty or lighter kick bar, a bass variation.
 - A riser: `{"kind": "synth", "preset": "noise", "swell": true}`: noise that fades in over each note's
   length, so one note `len` 16 rises from silence across a bar. `swell` works on any synth (pad swells).
 

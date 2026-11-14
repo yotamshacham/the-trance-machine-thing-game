@@ -28,11 +28,9 @@ interface Props {
   /** folded: the controls fold to one line; the steps stay */
   folded: boolean;
   onFold(folded: boolean): void;
-  /** the song's other tracks, for picking which ones this track cuts */
-  others: { id: string; name: string }[];
 }
 
-export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch, onSolo, onPen, onPreview, onAudition, ask, folded, onFold, others }: Props) {
+export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch, onSolo, onPen, onPreview, onAudition, ask, folded, onFold }: Props) {
   const pattern = patternId ? track.patterns[patternId] : undefined;
   const drum = track.instrument.kind === 'drum';
   const update = (change: Partial<Omit<Track, 'id' | 'patterns'>>) => dispatch({ type: 'update-track', trackId: track.id, change });
@@ -191,29 +189,6 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
               {track.group && !PARTS.some((p) => p.id === track.group) && <option value={track.group}>{track.group}</option>}
             </select>
           </label>
-          <details className="cut-picker">
-            <summary
-              className={track.cut ? 'active' : ''}
-              title="Cut: the tracks this one replaces. They're silent while it plays a note (a fill taking over from the kick and bass)."
-            >
-              Cut{track.cut ? ` ${track.cut.length}` : ''}
-            </summary>
-            <div className="cut-list">
-              {others.map((o) => (
-                <label key={o.id}>
-                  <input
-                    type="checkbox"
-                    checked={track.cut?.includes(o.id) ?? false}
-                    onChange={(e) => {
-                      const next = e.target.checked ? [...(track.cut ?? []), o.id] : (track.cut ?? []).filter((id) => id !== o.id);
-                      update({ cut: next.length ? next : undefined });
-                    }}
-                  />
-                  {o.name}
-                </label>
-              ))}
-            </div>
-          </details>
         </div>
         <div className="track-line fx-line">
           {(

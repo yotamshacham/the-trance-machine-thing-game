@@ -23,27 +23,10 @@ const song = (fill: Record<string, unknown>) =>
   });
 
 describe('fills', () => {
-  it('a fill silences the tracks it cuts while its notes play, and only those', () => {
-    const { events } = schedule(song({ group: 'fills', cut: ['kick'] }));
-    expect(events.filter((e) => e.step >= 16).map((e) => e.trackId).sort()).toEqual(['lead', 'lead', 'lead', 'lead', 'riser']);
-    expect(events.filter((e) => e.step < 16 && e.trackId === 'kick')).toHaveLength(4);
-  });
-
-  it('without cut, a fill is just another track', () => {
-    expect(schedule(song({ group: 'fills' })).events.filter((e) => e.step >= 16).length).toBe(9);
-  });
-
-  it('a muted fill cuts nothing', () => {
-    expect(schedule(song({ cut: ['kick'], mute: true })).events.filter((e) => e.trackId === 'kick')).toHaveLength(8);
-  });
-
-  it('refuses cutting a track that is not there', () => {
-    try {
-      song({ cut: ['kik'] });
-      expect.unreachable();
-    } catch (e) {
-      expect((e as SongError).issues).toEqual(['tracks.riser.cut: no track "kik"']);
-    }
+  it('a fill is just another track, in the group it names', () => {
+    const fill = song({ group: 'fills' });
+    expect(fill.tracks[2]).toMatchObject({ group: 'fills', instrument: { preset: 'noise', swell: true } });
+    expect(schedule(fill).events.filter((e) => e.step >= 16).length).toBe(9);
   });
 
   it('a group is a short lowercase name', () => {

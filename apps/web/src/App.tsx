@@ -159,7 +159,6 @@ export function App({ initial }: { initial: Song }) {
                   onAudition={() => engine.audition(track.id)}
                   banks={banks}
                   ask={ask}
-                  others={song.tracks.filter((t) => t.id !== track.id).map((t) => ({ id: t.id, name: t.name }))}
                   folded={!folds.openTracks.includes(track.id)}
                   onFold={(on) => setFolds((f) => ({ ...f, openTracks: toggle(f.openTracks, track.id, !on) }))}
                 />
