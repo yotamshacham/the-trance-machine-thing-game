@@ -6,14 +6,15 @@
 - Tracker UI: sections, per-track patterns, step grid, mute/solo/volume, undo, autosave.
 - MIDI import (GM drums mapped, 16th quantize, 4-bar sections deduped into patterns) and export.
 - `songs/basic-psy.json` template; Goa Sunrise and Night Forest examples.
+- Mix: per-track delay/reverb sends, duck by the kick, low/high-pass; shared tempo-synced delay and reverb. Lead presets: supersaw, psy-pluck, square-lead, soft-saw.
 - Tracks shown in foldable groups (kick & bass, drums, leads, pads & FX), each track's controls foldable to one line; worked out from the sound. Next: let a song name its own groups.
 - **✦ Ask** on tracks, sections and the song: requests an agent picks up (`pnpm song requests`), with replies shown in the app.
 - `songs/local/` (dev server): the app and an agent edit the same file live; agent edits load while playing.
 - Local sample banks (Futurephonic: 796 sounds, multisampled basses, tempo-synced loops), dev server only.
 
 ## Next
+- Song-level effect settings in the UI; filter and send automation over a section (builds).
 - Hear and tune the default sounds (kick and bass especially) against reference tracks.
-- Sidechain-style ducking of bass/pads by the kick; per-track effects (delay, reverb, filter).
 - Note editing beyond click/shift-click: velocity, length, slide in the grid.
 - In-app "Ask AI" (`docs/ai.md`).
 - Tracker module import (MOD/XM/IT/S3M): pattern-based like ours, so they map almost directly.

@@ -76,6 +76,8 @@ function crossReferenceIssues(song: Song): string[] {
       }
     }
   });
+  const by = song.effects?.duck?.by;
+  if (by !== undefined && !tracks.has(by)) issues.push(`effects.duck.by: no track "${by}"`);
   return issues;
 }
 

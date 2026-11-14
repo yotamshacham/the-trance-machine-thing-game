@@ -222,6 +222,7 @@ button.icon {
 
 /* tracks */
 .tracks {
+  position: relative;
   flex: 1;
   padding: 8px 16px 16px;
   display: flex;
@@ -244,7 +245,7 @@ button.icon {
 }
 
 .track-head {
-  width: 250px;
+  width: var(--head, 280px);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -563,6 +564,8 @@ button.icon.fold {
 
 .track-sound {
   max-width: 90px;
+  flex-shrink: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -574,4 +577,100 @@ button.icon.fold {
   font-size: 12px;
   color: var(--amber);
   line-height: 1.35;
+}
+
+.fx-line {
+  gap: 8px;
+}
+
+.fx {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.fx input[type='range'] {
+  width: 100%;
+  padding: 0;
+  accent-color: var(--teal);
+}
+
+/* folded: the whole pattern as one thin strip, bars side by side, no note names */
+.track.folded {
+  align-items: center;
+}
+
+.track.folded .grid {
+  flex-direction: row;
+  gap: 4px;
+}
+
+.track.folded .bar {
+  flex: 1;
+  gap: 1px;
+}
+
+.track.folded .cell {
+  height: 16px;
+  font-size: 0;
+  border-radius: 2px;
+}
+
+.track.folded .silent {
+  font-size: 12px;
+}
+
+.track-head > .track-line:first-child {
+  flex-wrap: wrap;
+}
+
+.ask-button.compact {
+  padding: 2px 7px;
+}
+
+/* a compact ✦'s form takes a line of its own under the track's first line */
+.ask-form.compact {
+  flex-basis: 100%;
+  order: 10;
+}
+
+/* the divider between the tracks' controls and their grids: main's padding (16) + a track's
+   border (1) and padding (8) + the controls + half the gap (6) */
+.splitter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(16px + 1px + 8px + var(--head, 280px) + 6px - 4px);
+  width: 8px;
+  cursor: col-resize;
+  z-index: 2;
+  touch-action: none;
+}
+
+.splitter::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: var(--line);
+  transition: background 0.15s;
+}
+
+.splitter:hover::after,
+.splitter:focus-visible::after {
+  background: var(--violet);
+}
+
+.splitter:focus-visible {
+  outline: none;
+}
+
+.track-sound {
+  max-width: 40%;
 }
