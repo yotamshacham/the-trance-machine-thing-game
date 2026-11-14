@@ -2,8 +2,27 @@
 // groups (kicks, basses, leads …). A group key picks a category; a bank group's sounds are then
 // stepped through one by one.
 
-import { DRUM_VOICES, SYNTH_PRESETS, type Instrument } from '@ttm/song';
-import { findSound, groupsOf, type Bank } from './bank.ts';
+import { DRUM_VOICES, SYNTH_PRESETS, type Instrument, type Track } from '@ttm/song';
+import { findSound, groupsOf, type Bank, type BankSound } from './bank.ts';
+
+/** A loop: a sample with its own tempo. It plays its own riff, so it can't play a melody. */
+export const isLoop = (instrument: Instrument): boolean => instrument.kind === 'sampler' && instrument.bpm !== undefined;
+
+/** A melody track plays more than one pitch. */
+export function isMelodic(track: Track): boolean {
+  const pitches = new Set(Object.values(track.patterns).flatMap((p) => p.notes.map((n) => n.pitch)));
+  pitches.delete(undefined);
+  return pitches.size > 1;
+}
+
+/** For a melody track, sounds that aren't loops. */
+export interface ForTrack {
+  melodic?: boolean;
+}
+
+/** A bank group's sounds a track may use. */
+export const soundsOf = (bank: Bank, group: string, { melodic = false }: ForTrack = {}): BankSound[] =>
+  bank.sounds.filter((s) => s.group === group && !(melodic && isLoop(s.instrument)));
 
 export interface SoundOption {
   key: string;
@@ -18,13 +37,15 @@ export interface SoundGroup {
 const title = (s: string) => s.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
 const bankKey = (bankId: string, group: string) => `bank:${bankId}:${group}`;
 
-export function soundGroups(banks: Bank[]): SoundGroup[] {
+export function soundGroups(banks: Bank[], forTrack: ForTrack = {}): SoundGroup[] {
   return [
     { label: 'Drum machine', options: DRUM_VOICES.map((v) => ({ key: `drum:${v}`, label: title(v) })) },
     { label: 'Synth', options: SYNTH_PRESETS.map((p) => ({ key: `synth:${p}`, label: title(p) })) },
     ...banks.map((b) => ({
       label: `${b.name} samples`,
-      options: groupsOf(b).map((g) => ({ key: bankKey(b.id, g), label: g })),
+      options: groupsOf(b)
+        .filter((g) => soundsOf(b, g, forTrack).length)
+        .map((g) => ({ key: bankKey(b.id, g), label: g })),
     })),
     { label: 'Other', options: [{ key: 'sampler', label: 'Sampler (your own URL)' }] },
   ];
@@ -39,7 +60,7 @@ export function soundKey(instrument: Instrument, banks: Bank[]): string {
 }
 
 /** The instrument an option gives, and a name for a new track with it. */
-export function soundFor(key: string, current: Instrument, banks: Bank[]): { instrument: Instrument; name: string } {
+export function soundFor(key: string, current: Instrument, banks: Bank[], forTrack: ForTrack = {}): { instrument: Instrument; name: string } {
   const [kind, a, ...rest] = key.split(':');
   if (kind === 'drum') return { instrument: { kind: 'drum', voice: a as never }, name: title(a!) };
   if (kind === 'synth') {
@@ -49,7 +70,8 @@ export function soundFor(key: string, current: Instrument, banks: Bank[]): { ins
   }
   if (kind === 'bank') {
     const group = rest.join(':');
-    const sound = banks.find((b) => b.id === a)?.sounds.find((s) => s.group === group);
+    const bank = banks.find((b) => b.id === a);
+    const sound = bank && soundsOf(bank, group, forTrack)[0];
     if (sound) return { instrument: sound.instrument, name: sound.label.split(' · ')[0]! };
   }
   return {

@@ -3,7 +3,7 @@
 import * as Tone from 'tone';
 import { toMidi, type Instrument, type NoteEvent, type SamplerInstrument } from '@ttm/song';
 import { sampleUrl } from './sample-url.ts';
-import { drumSettings, synthSettings, type DrumSettings, type SynthSettings } from './presets.ts';
+import { LOOP_FADE, drumSettings, synthSettings, type DrumSettings, type SynthSettings } from './presets.ts';
 
 export interface Voice {
   output: Tone.ToneAudioNode;
@@ -155,8 +155,15 @@ function loopVoice(instrument: SamplerInstrument): Voice {
       if (!player.loaded || e.pitch === null) return;
       player.playbackRate = rate;
       player.detune = (e.pitch - root) * 100;
-      output.gain.setValueAtTime(e.vel, time);
-      player.start(time).stop(time + seconds);
+      // fade in and out, so a note starting or stopping mid-waveform doesn't click
+      const fade = Math.min(LOOP_FADE, seconds / 3);
+      const end = time + seconds;
+      output.gain.cancelScheduledValues(time);
+      output.gain.setValueAtTime(0, time);
+      output.gain.linearRampToValueAtTime(e.vel, time + fade);
+      output.gain.setValueAtTime(e.vel, end - fade);
+      output.gain.linearRampToValueAtTime(0, end);
+      player.start(time).stop(end);
     },
     setTempo(bpm) {
       rate = bpm / instrument.bpm!;

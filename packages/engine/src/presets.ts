@@ -101,3 +101,6 @@ export function drumSettings(instrument: DrumInstrument): DrumSettings {
     }),
   };
 }
+
+/** Seconds a loop note fades in and out over, so its edges don't click. */
+export const LOOP_FADE = 0.008;
