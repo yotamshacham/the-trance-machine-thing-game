@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Ask, RequestTarget } from '../requests.ts';
 
 interface Props {
@@ -10,15 +10,29 @@ interface Props {
   label?: string;
 }
 
+const RECENT_MS = 60_000;
+
 /** A button that opens a one-line request to the agent about a track, a section or the song. */
 export function AskClaude({ ask, target, about, label = 'Ask' }: Props) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [error, setError] = useState<string>();
+  const latest = ask?.latest(target);
+  // a finished request shows for a while, then the button is just a button again
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!latest?.doneAt) return;
+    const left = latest.doneAt + RECENT_MS - Date.now();
+    if (left <= 0) return;
+    const t = setTimeout(() => tick((n) => n + 1), left);
+    return () => clearTimeout(t);
+  }, [latest?.doneAt]);
   if (!ask) return null;
+  const busy = latest?.status === 'pending' || latest?.status === 'working';
+  const recent = latest?.doneAt !== undefined && Date.now() - latest.doneAt < RECENT_MS;
   const send = async () => {
     try {
-      await ask(target, text);
+      await ask.send(target, text);
       setText('');
       setOpen(false);
       setError(undefined);
@@ -27,10 +41,24 @@ export function AskClaude({ ask, target, about, label = 'Ask' }: Props) {
     }
   };
   if (!open) {
+    if (busy) {
+      return (
+        <span className="ask-status working" title={latest!.text}>
+          ✦ {latest!.status === 'pending' ? 'waiting for Claude…' : 'Claude is working…'}
+        </span>
+      );
+    }
     return (
-      <button className="ask-button" onClick={() => setOpen(true)} title={`Ask Claude to change ${about}`}>
-        ✦ {label}
-      </button>
+      <span className="ask-line">
+        <button className="ask-button" onClick={() => setOpen(true)} title={`Ask Claude to change ${about}`}>
+          ✦ {label}
+        </button>
+        {recent && (
+          <span className={`ask-status ${latest!.status}`} title={latest!.reply}>
+            {latest!.status === 'done' ? '✓ done' : "✗ couldn't"}: {latest!.reply}
+          </span>
+        )}
+      </span>
     );
   }
   return (

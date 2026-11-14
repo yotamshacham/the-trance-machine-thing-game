@@ -465,3 +465,46 @@ button.tiny {
 .request-reply {
   color: var(--teal);
 }
+
+.ask-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ask-status {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ask-status.working {
+  color: var(--amber);
+  padding: 4px 8px;
+  border: 1px dashed var(--amber);
+  border-radius: 6px;
+  animation: ask-pulse 1.2s ease-in-out infinite;
+}
+
+.ask-status.done {
+  color: var(--teal);
+}
+
+.ask-status.failed {
+  color: var(--pink);
+}
+
+@keyframes ask-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-status.working {
+    animation: none;
+  }
+}

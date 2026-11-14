@@ -30,13 +30,24 @@ export function useRequests(file: string | undefined) {
     requests: requests.filter((r) => r.file === file),
     /** undefined when there's no linked file to ask about */
     ask: file
-      ? async (target: RequestTarget, text: string) => {
-          const response = await fetch('/local-songs/requests', { method: 'POST', body: JSON.stringify({ file, target, text }) });
-          if (!response.ok) throw new Error(((await response.json()) as { error: string }).error);
-          setRequests(await list());
+      ? {
+          async send(target: RequestTarget, text: string) {
+            const response = await fetch('/local-songs/requests', { method: 'POST', body: JSON.stringify({ file, target, text }) });
+            if (!response.ok) throw new Error(((await response.json()) as { error: string }).error);
+            setRequests(await list());
+          },
+          latest: (target: RequestTarget) => requests.findLast((r) => r.file === file && sameTarget(r.target, target)),
         }
       : undefined,
   };
 }
 
-export type Ask = (target: RequestTarget, text: string) => Promise<void>;
+export interface Ask {
+  send(target: RequestTarget, text: string): Promise<void>;
+  /** the last request about this target, to show how it's going */
+  latest(target: RequestTarget): Request | undefined;
+}
+
+const sameTarget = (a: RequestTarget, b: RequestTarget) =>
+  a.kind === b.kind &&
+  (a.kind === 'song' || (a.kind === 'track' && b.kind === 'track' && a.trackId === b.trackId) || (a.kind === 'section' && b.kind === 'section' && a.index === b.index));
