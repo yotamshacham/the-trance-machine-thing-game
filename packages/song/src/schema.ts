@@ -47,7 +47,7 @@ export const PatternInput = z.union([
 ]);
 
 export const DRUM_VOICES = ['kick', 'clap', 'snare', 'closed-hat', 'open-hat', 'ride', 'perc', 'shaker'] as const;
-export const SYNTH_PRESETS = ['rolling-bass', 'acid', 'sub', 'pad', 'lead', 'pluck'] as const;
+export const SYNTH_PRESETS = ['rolling-bass', 'acid', 'sub', 'pad', 'lead', 'pluck', 'supersaw', 'psy-pluck', 'square-lead', 'soft-saw'] as const;
 export const WAVES = ['sawtooth', 'square', 'sine', 'triangle'] as const;
 
 export const DrumInstrument = z
@@ -103,6 +103,16 @@ const trackShape = {
   gain: z.number().min(-60).max(12).optional().describe('dB, default 0'),
   pan: z.number().min(-1).max(1).optional().describe('-1 left … 1 right, default 0'),
   mute: z.boolean().optional(),
+  delay: z.number().min(0).max(1).optional().describe("Send to the song's delay, 0–1 (leads ~0.2–0.35)"),
+  reverb: z.number().min(0).max(1).optional().describe("Send to the song's reverb, 0–1 (pads and leads ~0.15–0.4)"),
+  duck: z
+    .number()
+    .min(0)
+    .max(1)
+    .optional()
+    .describe('How far the track dips each time the ducking track (the kick) hits, 0–1 (bass ~0.6–0.8, pads ~0.5)'),
+  lowpass: z.number().min(20).max(20000).optional().describe('Cut above this many Hz'),
+  highpass: z.number().min(20).max(20000).optional().describe('Cut below this many Hz (keep non-bass tracks out of the kick, ~150)'),
 };
 
 export const Track = z.object({ ...trackShape, patterns: z.record(Id, Pattern) });
@@ -125,6 +135,24 @@ const songShape = {
   key: z.string().optional().describe('Informational, e.g. "F# phrygian"'),
   description: z.string().optional(),
   arrangement: z.array(Section).min(1),
+  effects: z
+    .object({
+      delay: z
+        .object({
+          steps: z.number().min(0.25).max(16).optional().describe('Echo time in steps: 3 = dotted 8th (default), 2 = 8th, 4 = quarter'),
+          feedback: z.number().min(0).max(0.9).optional().describe('How much each echo repeats, default 0.35'),
+        })
+        .optional(),
+      reverb: z.object({ decay: z.number().min(0.2).max(15).optional().describe('Seconds, default 2.5') }).optional(),
+      duck: z
+        .object({
+          by: Id.optional().describe('The track whose hits make the others dip, default "kick"'),
+          release: z.number().min(0.02).max(1).optional().describe('Seconds to come back up, default 0.18'),
+        })
+        .optional(),
+    })
+    .optional()
+    .describe("The song's shared effects; tracks send to them (delay, reverb) and dip with the kick (duck)"),
 };
 
 export const Song = z.object({ ...songShape, tracks: z.array(Track) });
@@ -143,4 +171,5 @@ export type Track = z.infer<typeof Track>;
 export type TrackInput = z.infer<typeof TrackInput>;
 export type Section = z.infer<typeof Section>;
 export type Song = z.infer<typeof Song>;
+export type Effects = NonNullable<Song['effects']>;
 export type SongInput = z.infer<typeof SongInput>;

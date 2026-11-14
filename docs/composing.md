@@ -20,6 +20,14 @@ defaults, not rules; when the user asks for something else, do that.
   (`len` = the loop's length), never a melody. Melodies go on synths or one-shot samples (Tonal hits).
 - **Pad**: long chords (`notes` with `len` 32–64) for breakdowns.
 
+## Mix
+- **Duck** the bass (0.6–0.8) and pads (0.4–0.6) with the kick: the pump that makes room for it.
+- **Delay** on leads and plucks (0.2–0.35); a dotted 8th (the default) is the psy classic.
+- **Reverb** on pads, leads and claps (0.15–0.4); keep kick and bass dry.
+- **Highpass** everything that isn't kick or bass around 150 Hz, so the low end stays theirs.
+- Leads: `supersaw` for big moments, `psy-pluck` for 16th lines, `square-lead` for chip tunes,
+  `soft-saw` for breakdowns.
+
 ## Arrangement
 Phrases are 8 or 16 bars; change something every 8. A typical full-on track (~7–9 min):
 intro (kick + hats, 32) → build (bass in, 16) → drop (everything, 32) → breakdown (no kick,

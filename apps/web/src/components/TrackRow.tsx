@@ -172,6 +172,27 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
             ))}
           </div>
         )}
+        <div className="track-line fx-line">
+          {(
+            [
+              ['delay', 'Delay', 'Send to the song’s delay (echo timed to the tempo)'],
+              ['reverb', 'Reverb', 'Send to the song’s reverb'],
+              ['duck', 'Duck', 'Dip each time the kick hits (sidechain): bass and pads, mostly'],
+            ] as const
+          ).map(([key, label, title]) => (
+            <label key={key} className="fx" title={`${title}: ${Math.round((track[key] ?? 0) * 100)}%`}>
+              <span>{label}</span>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={track[key] ?? 0}
+                onChange={(e) => update({ [key]: Number(e.target.value) || undefined })}
+              />
+            </label>
+          ))}
+        </div>
         {ask && (
           <div className="track-line">
             <AskClaude ask={ask} target={{ kind: 'track', trackId: track.id, name: track.name }} about={track.name} />

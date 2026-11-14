@@ -73,6 +73,56 @@
         ]
       }
     },
+    "effects": {
+      "description": "The song's shared effects; tracks send to them (delay, reverb) and dip with the kick (duck)",
+      "type": "object",
+      "properties": {
+        "delay": {
+          "type": "object",
+          "properties": {
+            "steps": {
+              "description": "Echo time in steps: 3 = dotted 8th (default), 2 = 8th, 4 = quarter",
+              "type": "number",
+              "minimum": 0.25,
+              "maximum": 16
+            },
+            "feedback": {
+              "description": "How much each echo repeats, default 0.35",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.9
+            }
+          }
+        },
+        "reverb": {
+          "type": "object",
+          "properties": {
+            "decay": {
+              "description": "Seconds, default 2.5",
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 15
+            }
+          }
+        },
+        "duck": {
+          "type": "object",
+          "properties": {
+            "by": {
+              "description": "The track whose hits make the others dip, default \"kick\"",
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "release": {
+              "description": "Seconds to come back up, default 0.18",
+              "type": "number",
+              "minimum": 0.02,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    },
     "tracks": {
       "type": "array",
       "items": {
@@ -143,7 +193,11 @@
                       "sub",
                       "pad",
                       "lead",
-                      "pluck"
+                      "pluck",
+                      "supersaw",
+                      "psy-pluck",
+                      "square-lead",
+                      "soft-saw"
                     ]
                   },
                   "wave": {
@@ -273,6 +327,36 @@
           },
           "mute": {
             "type": "boolean"
+          },
+          "delay": {
+            "description": "Send to the song's delay, 0–1 (leads ~0.2–0.35)",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reverb": {
+            "description": "Send to the song's reverb, 0–1 (pads and leads ~0.15–0.4)",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "duck": {
+            "description": "How far the track dips each time the ducking track (the kick) hits, 0–1 (bass ~0.6–0.8, pads ~0.5)",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "lowpass": {
+            "description": "Cut above this many Hz",
+            "type": "number",
+            "minimum": 20,
+            "maximum": 20000
+          },
+          "highpass": {
+            "description": "Cut below this many Hz (keep non-bass tracks out of the kick, ~150)",
+            "type": "number",
+            "minimum": 20,
+            "maximum": 20000
           },
           "patterns": {
             "type": "object",

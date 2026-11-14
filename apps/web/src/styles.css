@@ -575,3 +575,23 @@ button.icon.fold {
   color: var(--amber);
   line-height: 1.35;
 }
+
+.fx-line {
+  gap: 8px;
+}
+
+.fx {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.fx input[type='range'] {
+  width: 100%;
+  padding: 0;
+  accent-color: var(--teal);
+}

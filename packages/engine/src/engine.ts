@@ -2,15 +2,40 @@
 // 16th at a time. Songs can be swapped while playing; the loop carries on from the same step.
 
 import * as Tone from 'tone';
-import { schedule, scheduleSections, stepSeconds, type NoteEvent, type Section, type Song } from '@ttm/song';
+import {
+  effectsOf,
+  mixOf,
+  schedule,
+  scheduleSections,
+  stepSeconds,
+  type NoteEvent,
+  type Section,
+  type Song,
+  type SongEffects,
+} from '@ttm/song';
 import { createVoice, type Voice } from './voices.ts';
 
+/**
+ * A track's path to the speakers: voice → highpass → lowpass → duck → channel (gain, pan, mute)
+ * → master, and from the channel to the shared delay and reverb by its sends.
+ */
 interface Strip {
   /** the instrument the voice was built from, to know when to rebuild it */
   instrument: string;
   voice: Voice;
+  highpass: Tone.Filter;
+  lowpass: Tone.Filter;
+  /** dips on each hit of the ducking track */
+  duck: Tone.Gain;
+  depth: number;
   channel: Tone.Channel;
+  delaySend: Tone.Gain;
+  reverbSend: Tone.Gain;
 }
+
+/** Filters left open are set past what they'd touch. */
+const OPEN_HIGHPASS = 10;
+const OPEN_LOWPASS = 22000;
 
 export class Engine {
   /** called (on the animation frame) with each step as it sounds, and the audio-clock time it sounds at */
@@ -19,6 +44,9 @@ export class Engine {
   visualDelay = 0;
 
   private readonly master = new Tone.Limiter(-1).toDestination();
+  private readonly delay = new Tone.FeedbackDelay({ delayTime: 0.3, feedback: 0.35, wet: 1 }).connect(this.master);
+  private readonly reverb = new Tone.Reverb({ decay: 2.5, wet: 1 }).connect(this.master);
+  private effects: SongEffects | undefined;
   private readonly strips = new Map<string, Strip>();
   private readonly solo = new Set<string>();
   private song: Song | undefined;
@@ -43,27 +71,30 @@ export class Engine {
 
     for (const [id, strip] of this.strips) {
       if (!song.tracks.some((t) => t.id === id)) {
-        strip.voice.dispose();
-        strip.channel.dispose();
+        disposeStrip(strip);
         this.strips.delete(id);
       }
     }
+    this.setEffects(effectsOf(song), song.bpm);
     for (const track of song.tracks) {
       const instrument = JSON.stringify(track.instrument);
       let strip = this.strips.get(track.id);
       if (strip && strip.instrument !== instrument) {
         strip.voice.dispose();
         strip.voice = createVoice(track.instrument);
-        strip.voice.output.connect(strip.channel);
+        strip.voice.output.connect(strip.highpass);
         strip.instrument = instrument;
       }
       if (!strip) {
-        const channel = new Tone.Channel().connect(this.master);
-        const voice = createVoice(track.instrument);
-        voice.output.connect(channel);
-        strip = { instrument, voice, channel };
+        strip = this.createStrip(instrument, createVoice(track.instrument));
         this.strips.set(track.id, strip);
       }
+      const mix = mixOf(track);
+      strip.highpass.frequency.value = mix.highpass ?? OPEN_HIGHPASS;
+      strip.lowpass.frequency.value = mix.lowpass ?? OPEN_LOWPASS;
+      strip.delaySend.gain.value = mix.delay;
+      strip.reverbSend.gain.value = mix.reverb;
+      strip.depth = mix.duck;
       strip.channel.volume.value = track.gain ?? 0;
       strip.channel.pan.value = track.pan ?? 0;
       strip.channel.mute = track.mute ?? false;
@@ -131,12 +162,45 @@ export class Engine {
 
   dispose(): void {
     this.stop();
-    for (const s of this.strips.values()) {
-      s.voice.dispose();
-      s.channel.dispose();
-    }
+    for (const s of this.strips.values()) disposeStrip(s);
     this.strips.clear();
+    this.delay.dispose();
+    this.reverb.dispose();
     this.master.dispose();
+  }
+
+  private createStrip(instrument: string, voice: Voice): Strip {
+    const channel = new Tone.Channel().connect(this.master);
+    const duck = new Tone.Gain(1).connect(channel);
+    const lowpass = new Tone.Filter(OPEN_LOWPASS, 'lowpass').connect(duck);
+    const highpass = new Tone.Filter(OPEN_HIGHPASS, 'highpass').connect(lowpass);
+    voice.output.connect(highpass);
+    const delaySend = new Tone.Gain(0).connect(this.delay);
+    const reverbSend = new Tone.Gain(0).connect(this.reverb);
+    channel.connect(delaySend);
+    channel.connect(reverbSend);
+    return { instrument, voice, highpass, lowpass, duck, depth: 0, channel, delaySend, reverbSend };
+  }
+
+  private setEffects(effects: SongEffects, bpm: number): void {
+    const before = this.effects;
+    this.effects = effects;
+    this.delay.delayTime.value = effects.delay.steps * stepSeconds(bpm);
+    this.delay.feedback.value = effects.delay.feedback;
+    // a new decay means a new impulse response: only when it changed
+    if (before?.reverb.decay !== effects.reverb.decay) this.reverb.decay = effects.reverb.decay;
+  }
+
+  /** Each strip that ducks dips at `at`, then comes back up. */
+  private duckAt(at: number): void {
+    const release = this.effects?.duck.release ?? 0.18;
+    for (const s of this.strips.values()) {
+      if (s.depth <= 0) continue;
+      const g = s.duck.gain;
+      g.cancelAndHoldAtTime(at);
+      g.linearRampToValueAtTime(1 - s.depth, at + 0.004);
+      g.setTargetAtTime(1, at + 0.02, release / 3);
+    }
   }
 
   private tick(time: number): void {
@@ -145,7 +209,21 @@ export class Engine {
     this.step = step + 1;
     const d = stepSeconds(this.song.bpm);
     const at = time + (step % 2 === 1 ? (this.song.swing ?? 0) * d : 0);
-    for (const e of this.byStep.get(step) ?? []) this.strips.get(e.trackId)?.voice.play(e, at, e.len * d);
+    const ducker = this.effects?.duck.by;
+    let ducked = false;
+    for (const e of this.byStep.get(step) ?? []) {
+      const strip = this.strips.get(e.trackId);
+      strip?.voice.play(e, at, e.len * d);
+      // the ducking track ducks the rest only while it's heard
+      if (!ducked && e.trackId === ducker && strip && !strip.channel.muted) {
+        this.duckAt(at);
+        ducked = true;
+      }
+    }
     Tone.getDraw().schedule(() => this.onStep?.(step, at), at + this.visualDelay);
   }
+}
+
+function disposeStrip(s: Strip): void {
+  for (const node of [s.voice, s.highpass, s.lowpass, s.duck, s.channel, s.delaySend, s.reverbSend]) node.dispose();
 }

@@ -65,7 +65,7 @@ function drumVoice({ body, noise }: DrumSettings): Voice {
 
 function synthVoice(s: SynthSettings): Voice {
   const options = {
-    oscillator: s.fat ? { type: `fat${s.wave}` as const, count: 3, spread: 24 } : { type: s.wave },
+    oscillator: s.fat ? { type: `fat${s.wave}` as const, count: s.voices, spread: s.spread } : { type: s.wave },
     filter: { type: 'lowpass' as const, Q: s.resonance, rolloff: -24 as const },
     envelope: { attack: s.attack, decay: s.decay, sustain: s.sustain, release: s.release },
     filterEnvelope: {

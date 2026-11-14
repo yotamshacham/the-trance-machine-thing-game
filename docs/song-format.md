@@ -55,7 +55,8 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
 ## Instruments
 - `{"kind":"drum","voice":…}`: the drum machine, synthesized. Voices: `kick clap snare closed-hat
   open-hat ride perc shaker`. Optional `tune` (semitones), `decay` (multiplier).
-- `{"kind":"synth","preset":…}`: presets `rolling-bass acid sub pad lead pluck`. Optional overrides:
+- `{"kind":"synth","preset":…}`: presets `rolling-bass acid sub pad lead pluck supersaw psy-pluck
+  square-lead soft-saw`. Optional overrides:
   `wave` (`sawtooth square sine triangle`), `cutoff` Hz, `resonance`, `envAmount` (octaves the filter
   opens), `attack decay sustain release` seconds, `glide` seconds. `rolling-bass`, `acid` and `sub`
   are mono (slides work); the rest are polyphonic.
@@ -68,5 +69,25 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
     `len` 256 plays a 16-bar loop once.
   - Samples under `/local-samples/…` come from a local bank (`docs/samples.md`) and play only on
     the dev server of a computer that has those packs.
+
+## Mix and effects
+Each track can also say how it sits in the mix (all optional, 0 when left out):
+
+| field | meaning |
+|---|---|
+| `delay`, `reverb` | 0–1: how much of the track goes to the song's delay and reverb (its **sends**) |
+| `duck` | 0–1: how far the track dips each time the ducking track (the kick) hits, then recovers |
+| `lowpass`, `highpass` | Hz: cut above / below |
+
+The song's shared effects, all optional:
+```jsonc
+"effects": {
+  "delay": { "steps": 3, "feedback": 0.35 },  // echo time in steps (3 = dotted 8th)
+  "reverb": { "decay": 2.5 },                 // seconds
+  "duck": { "by": "kick", "release": 0.18 }   // the track that ducks the others; seconds back up
+}
+```
+`duck.by` must name a track if given; by default it's `kick`, and if the song has no such track
+nothing ducks. A muted ducking track doesn't duck.
 
 Sound settings per preset live in `packages/engine/src/presets.ts`.
