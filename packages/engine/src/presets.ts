@@ -33,7 +33,7 @@ export interface SynthSettings {
   lfos: Lfo[];
   /** the oscillator's level, 0–1: 0 leaves only the noise */
   tone: number;
-  /** each note fades in from silence over its whole length */
+  /** each note fades in from silence over its whole length (the riser) */
   swell: boolean;
   /** level of a sine at the same pitch under the oscillator, for low-end weight (0 = none) */
   sub: number;
@@ -61,8 +61,8 @@ export const SYNTH_PRESETS: Record<SynthPreset, SynthSettings> = {
   'square-lead': { mono: false, wave: 'square', fat: true, voices: 2, spread: 8, cutoff: 4000, resonance: 1, envAmount: 0.5, attack: 0.003, decay: 0.1, sustain: 0.8, release: 0.08, filterDecay: 0.1, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], tone: 1, swell: false, sub: 0, drive: 0, accent: 0, glide: 0 },
   // a slower, darker saw for breakdowns
   'soft-saw': { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 20, cutoff: 1500, resonance: 0.7, envAmount: 0.8, attack: 0.04, decay: 0.4, sustain: 0.6, release: 0.6, filterDecay: 0.4, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], tone: 1, swell: false, sub: 0, drive: 0, accent: 0, glide: 0 },
-  // noise only: with swell on, a riser
-  noise: { mono: false, wave: 'sine', fat: false, voices: 1, spread: 0, cutoff: 20000, resonance: 0, envAmount: 0, attack: 0.005, decay: 0.1, sustain: 1, release: 0.15, filterDecay: 0.1, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 1, lfos: [], tone: 0, swell: false, sub: 0, drive: 0, accent: 0, glide: 0 },
+  // a riser: noise only, rising from silence over each note's length
+  'noise-rise': { mono: false, wave: 'sine', fat: false, voices: 1, spread: 0, cutoff: 20000, resonance: 0, envAmount: 0, attack: 0.005, decay: 0.1, sustain: 1, release: 0.15, filterDecay: 0.1, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 1, lfos: [], tone: 0, swell: true, sub: 0, drive: 0, accent: 0, glide: 0 },
   pluck: { mono: false, wave: 'square', fat: false, voices: 1, spread: 24, cutoff: 1800, resonance: 2, envAmount: 2, attack: 0.002, decay: 0.22, sustain: 0, release: 0.2, filterDecay: 0.22, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], tone: 1, swell: false, sub: 0, drive: 0, accent: 0, glide: 0 },
 };
 
@@ -84,7 +84,7 @@ export function synthSettings(instrument: SynthInstrument): SynthSettings {
     noise: pick('noise'),
     lfos: instrument.lfo ?? base.lfos,
     tone: base.tone,
-    swell: instrument.swell ?? base.swell,
+    swell: base.swell,
     sub: pick('sub'),
     drive: pick('drive'),
     accent: base.accent,

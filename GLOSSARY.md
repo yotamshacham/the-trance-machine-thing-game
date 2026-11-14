@@ -44,7 +44,7 @@ A track's volume dipping each time the ducking track (the kick, by default) hits
 _Avoid_: sidechain (the studio technique it imitates), pump
 
 **Fill**:
-A short break that announces what comes next, usually the last bar of 8: the kick and bass change, and a track in the fills group plays.
+A short break that announces what comes next, usually the last bar of 8: the kick and bass patterns change, often with a riser.
 
 
 **Patch**:

@@ -36,8 +36,8 @@ defaults, not rules; when the user asks for something else, do that.
 
 ## Fills
 Every 8 bars, the last bar can be a fill: the kick and bass patterns change in that bar (no kick or a
-light one, a bass variation), and a `fills`-group track plays one note at step 112 of a 128-step pattern
-(it loops over longer sections). Noise riser (`noise` + `swell`), a snare
+light one, a bass variation), and a riser (`noise-rise`, one note at step 112, `len` 16) can build into
+the next bar. Name fill tracks "… fill" and the editor groups them under Fills. Noise riser (`noise` + `swell`), a snare
 roll speeding up 8ths → 16ths with rising `vel`, or a pad swell.
 
 ## Arrangement

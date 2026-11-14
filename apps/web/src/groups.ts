@@ -25,6 +25,7 @@ const WORDS: [RegExp, Part][] = [
 const byWords = (text: string): Part | undefined => WORDS.find(([re]) => re.test(text))?.[1];
 
 export function partOf(track: Track, banks: Bank[]): Part {
+  if (/\bfill/i.test(track.name)) return 'fills';
   const inst = track.instrument;
   if (inst.kind === 'drum') return inst.voice === 'kick' ? 'kick-bass' : 'drums';
   if (inst.kind === 'synth') {
@@ -36,21 +37,11 @@ export function partOf(track: Track, banks: Bank[]): Part {
 }
 
 export interface TrackGroup {
-  /** a part, or a group a song named itself */
-  id: string;
+  id: Part;
   name: string;
   tracks: Track[];
 }
 
-/** The group a track sits in: the one it names, else the part its sound suggests. */
-export const groupOf = (track: Track, banks: Bank[]): string => track.group ?? partOf(track, banks);
-
-/** The parts in their order, then any groups the song named itself, in the order they first appear. */
 export function groupTracks(tracks: Track[], banks: Bank[]): TrackGroup[] {
-  const known = new Set<string>(PARTS.map((p) => p.id));
-  const own = [...new Set(tracks.map((t) => groupOf(t, banks)).filter((g) => !known.has(g)))];
-  const name = (id: string) => id.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
-  return [...PARTS, ...own.map((id) => ({ id, name: name(id) }))]
-    .map((g) => ({ ...g, tracks: tracks.filter((t) => groupOf(t, banks) === g.id) }))
-    .filter((g) => g.tracks.length);
+  return PARTS.map((p) => ({ ...p, tracks: tracks.filter((t) => partOf(t, banks) === p.id) })).filter((g) => g.tracks.length);
 }

@@ -46,10 +46,6 @@ export function SynthPanel({ instrument, onChange }: Props) {
             <Knob label="Detune" value={s.spread} min={0} max={100} step={1} show={(v) => `${v}¢`} onChange={(detune) => set({ detune })} />
             <Knob label="Sub" value={s.sub} min={0} max={1} step={0.05} show={pct} onChange={(sub) => set({ sub })} />
             <Knob label="Noise" value={s.noise} min={0} max={1} step={0.05} show={pct} onChange={(noise) => set({ noise })} />
-            <label className="knob" title="Each note fades in from silence over its whole length: risers, pad swells">
-              <span>Swell</span>
-              <input type="checkbox" checked={s.swell} onChange={(e) => set({ swell: e.target.checked || undefined })} />
-            </label>
             <Knob label="Drive" value={s.drive} min={0} max={1} step={0.05} show={pct} onChange={(drive) => set({ drive })} />
           </div>
           <div className="knobs">

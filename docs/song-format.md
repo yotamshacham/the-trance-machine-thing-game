@@ -56,7 +56,8 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
 - `{"kind":"drum","voice":…}`: the drum machine, synthesized. Voices: `kick clap snare closed-hat
   open-hat ride perc shaker`. Optional `tune` (semitones), `decay` (multiplier).
 - `{"kind":"synth","preset":…}`: presets `rolling-bass acid sub pad lead pluck supersaw psy-pluck
-  square-lead soft-saw`. Optional overrides:
+  square-lead soft-saw noise-rise`. `noise-rise` is a riser: noise only, rising from silence
+  over each note's length (one note `len` 16 rises across a bar). Optional overrides:
   `wave` (`sawtooth square sine triangle`), `cutoff` Hz, `resonance`, `envAmount` (octaves the filter
   opens), `attack decay sustain release` seconds, `glide` seconds. `rolling-bass`, `acid` and `sub`
   are mono (slides work); the rest are polyphonic.
@@ -76,13 +77,6 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
     `len` 256 plays a 16-bar loop once.
   - Samples under `/local-samples/…` come from a local bank (`docs/samples.md`) and play only on
     the dev server of a computer that has those packs.
-
-## Fills
-Fills are ordinary tracks, usually in the `fills` group:
-- `"group": "fills"` puts a track in the editor's Fills group (any lowercase name makes a group of its own).
-- The kick and bass make room for a fill in their own patterns: an empty or lighter kick bar, a bass variation.
-- A riser: `{"kind": "synth", "preset": "noise", "swell": true}`: noise that fades in over each note's
-  length, so one note `len` 16 rises from silence across a bar. `swell` works on any synth (pad swells).
 
 ## Mix and effects
 Each track can also say how it sits in the mix (all optional, 0 when left out):

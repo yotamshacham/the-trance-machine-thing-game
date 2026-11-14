@@ -6,7 +6,7 @@
 - Tracker UI: sections, per-track patterns, step grid, mute/solo/volume, undo, autosave.
 - MIDI import (GM drums mapped, 16th quantize, 4-bar sections deduped into patterns) and export.
 - `songs/basic-psy.json` template; Goa Sunrise and Night Forest examples.
-- Fills: tracks in a `fills` group; `noise` preset + `swell` for risers. Groups can be named per track.
+- `noise-rise` synth preset (a riser); tracks named "… fill" show under Fills.
 - Synth patches: filter type and envelope, unison/detune, noise, sub, drive, two tempo-synced LFOs (cutoff, volume gate, pitch, pan); a Synth panel per track. Next: several oscillators per patch, a mod matrix, per-track chorus/phaser; later wavetables and a ladder filter (AudioWorklet).
 - Mix: per-track delay/reverb sends, duck by the kick, low/high-pass; shared tempo-synced delay and reverb. Lead presets: supersaw, psy-pluck, square-lead, soft-saw.
 - Tracks shown in foldable groups (kick & bass, drums, leads, pads & FX), each track's controls foldable to one line; worked out from the sound. Next: let a song name its own groups.

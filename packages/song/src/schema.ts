@@ -47,7 +47,7 @@ export const PatternInput = z.union([
 ]);
 
 export const DRUM_VOICES = ['kick', 'clap', 'snare', 'closed-hat', 'open-hat', 'ride', 'perc', 'shaker'] as const;
-export const SYNTH_PRESETS = ['rolling-bass', 'acid', 'sub', 'pad', 'lead', 'pluck', 'supersaw', 'psy-pluck', 'square-lead', 'soft-saw', 'noise'] as const;
+export const SYNTH_PRESETS = ['rolling-bass', 'acid', 'sub', 'pad', 'lead', 'pluck', 'supersaw', 'psy-pluck', 'square-lead', 'soft-saw', 'noise-rise'] as const;
 export const WAVES = ['sawtooth', 'square', 'sine', 'triangle'] as const;
 export const FILTER_TYPES = ['lowpass', 'highpass', 'bandpass', 'notch'] as const;
 export const LFO_TARGETS = ['cutoff', 'volume', 'pitch', 'pan'] as const;
@@ -97,7 +97,6 @@ export const SynthInstrument = z
     sub: z.number().min(0).max(1).optional().describe('A sine at the note’s pitch underneath, for weight'),
     drive: z.number().min(0).max(1).optional().describe('Saturation after the filter: grit'),
     lfo: z.array(Lfo).max(2).optional(),
-    swell: z.boolean().optional().describe('Each note fades in from silence over its whole length (risers, pad swells)'),
   })
   .describe('Subtractive synth. Preset gives the sound; the other fields override it.');
 
@@ -139,7 +138,6 @@ const trackShape = {
     .describe('How far the track dips each time the ducking track (the kick) hits, 0–1 (bass ~0.6–0.8, pads ~0.5)'),
   lowpass: z.number().min(20).max(20000).optional().describe('Cut above this many Hz'),
   highpass: z.number().min(20).max(20000).optional().describe('Cut below this many Hz (keep non-bass tracks out of the kick, ~150)'),
-  group: Id.optional().describe('The editor group the track sits in, e.g. "fills"; default worked out from its sound'),
 };
 
 export const Track = z.object({ ...trackShape, patterns: z.record(Id, Pattern) });

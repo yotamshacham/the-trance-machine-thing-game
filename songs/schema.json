@@ -198,7 +198,7 @@
                       "psy-pluck",
                       "square-lead",
                       "soft-saw",
-                      "noise"
+                      "noise-rise"
                     ]
                   },
                   "wave": {
@@ -361,10 +361,6 @@
                       ],
                       "description": "A low-frequency oscillator, synced to the tempo and to the bar"
                     }
-                  },
-                  "swell": {
-                    "description": "Each note fades in from silence over its whole length (risers, pad swells)",
-                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -467,11 +463,6 @@
             "type": "number",
             "minimum": 20,
             "maximum": 20000
-          },
-          "group": {
-            "description": "The editor group the track sits in, e.g. \"fills\"; default worked out from its sound",
-            "type": "string",
-            "pattern": "^[a-z0-9][a-z0-9-]*$"
           },
           "patterns": {
             "type": "object",

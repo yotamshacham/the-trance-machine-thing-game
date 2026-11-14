@@ -7,7 +7,6 @@ import { AskClaude } from './AskClaude.tsx';
 import { SoundSelect } from './SoundSelect.tsx';
 import { StepGrid } from './StepGrid.tsx';
 import { SynthPanel } from './SynthPanel.tsx';
-import { PARTS } from '../groups.ts';
 
 interface Props {
   track: Track;
@@ -178,18 +177,6 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
         {track.instrument.kind === 'synth' && (
           <SynthPanel instrument={track.instrument} onChange={(instrument) => update({ instrument })} />
         )}
-        <div className="track-line">
-          <label className="inline-label">
-            Group
-            <select value={track.group ?? ''} onChange={(e) => update({ group: e.target.value || undefined })} aria-label="Group">
-              <option value="">Automatic</option>
-              {PARTS.filter((p) => p.id !== 'other').map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-              {track.group && !PARTS.some((p) => p.id === track.group) && <option value={track.group}>{track.group}</option>}
-            </select>
-          </label>
-        </div>
         <div className="track-line fx-line">
           {(
             [
