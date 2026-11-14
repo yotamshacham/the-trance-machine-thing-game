@@ -35,8 +35,8 @@ defaults, not rules; when the user asks for something else, do that.
 - **Wobble/rolling motion** on a bass: cutoff LFO at `rate` 2–4, small depth (0.2–0.3).
 
 ## Fills
-Every 8 bars, the last bar can empty out for a fill: a `fills`-group track with `cut` and one note at
-step 112 of a 128-step pattern (it loops over longer sections). Noise riser (`noise` + `swell`), a snare
+Every 8 bars, the last bar can hand over to a fill: a `fills`-group track that `cut`s the kick and
+bass (say), with one note at step 112 of a 128-step pattern (it loops over longer sections). Noise riser (`noise` + `swell`), a snare
 roll speeding up 8ths → 16ths with rising `vel`, or a pad swell.
 
 ## Arrangement

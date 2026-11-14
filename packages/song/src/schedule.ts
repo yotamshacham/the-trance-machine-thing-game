@@ -71,20 +71,12 @@ export function scheduleSections(song: Song, sections: Section[]): Schedule {
   return { events: linkSlides(cut(song, events)), length: start };
 }
 
-/** While a cutting track's note plays, tracks outside its group are silent (a fill's empty bar). */
+/** While a fill's note plays, the tracks it cuts are silent. */
 function cut(song: Song, events: Pending[]): Pending[] {
-  const tracks = new Map(song.tracks.map((t) => [t.id, t]));
-  const spans = events
-    .filter((e) => {
-      const t = tracks.get(e.trackId);
-      return t?.cut && !t.mute;
-    })
-    .map((e) => ({ from: e.step, to: e.step + e.len, trackId: e.trackId, group: tracks.get(e.trackId)!.group }));
-  if (!spans.length) return events;
-  return events.filter((e) => {
-    const group = tracks.get(e.trackId)?.group;
-    return !spans.some((s) => e.step >= s.from && e.step < s.to && e.trackId !== s.trackId && (s.group === undefined || group !== s.group));
-  });
+  const cutters = new Map(song.tracks.filter((t) => t.cut && !t.mute).map((t) => [t.id, new Set(t.cut)]));
+  if (!cutters.size) return events;
+  const spans = events.filter((e) => cutters.has(e.trackId)).map((e) => ({ from: e.step, to: e.step + e.len, cuts: cutters.get(e.trackId)! }));
+  return events.filter((e) => !spans.some((s) => s.cuts.has(e.trackId) && e.step >= s.from && e.step < s.to));
 }
 
 type Pending = NoteEvent & { slide: boolean };

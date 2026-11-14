@@ -474,8 +474,14 @@
             "pattern": "^[a-z0-9][a-z0-9-]*$"
           },
           "cut": {
-            "description": "While this track plays a note, every track outside its group is silent: a fill with an empty bar",
-            "type": "boolean"
+            "description": "Track ids this track replaces: they are silent while it plays a note (a fill taking over from the kick and bass)",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "description": "Stable identifier, e.g. \"kick\" or \"bass-2\""
+            }
           },
           "patterns": {
             "type": "object",

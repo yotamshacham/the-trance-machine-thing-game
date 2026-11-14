@@ -23,24 +23,27 @@ const song = (fill: Record<string, unknown>) =>
   });
 
 describe('fills', () => {
-  it('a cutting track silences every track outside its group while its notes play', () => {
-    const { events } = schedule(song({ group: 'fills', cut: true }));
-    expect(events.filter((e) => e.step >= 16).map((e) => e.trackId)).toEqual(['riser']);
-    expect(events.filter((e) => e.step < 16).map((e) => e.trackId)).toContain('kick');
-  });
-
-  it('tracks in the same group as the fill keep playing', () => {
-    const s = song({ group: 'fills', cut: true });
-    const withSnare = parseSong({ ...s, tracks: s.tracks.map((t) => (t.id === 'kick' ? { ...t, group: 'fills' } : t)) });
-    expect(schedule(withSnare).events.filter((e) => e.step >= 16).map((e) => e.trackId).sort()).toEqual(['kick', 'kick', 'kick', 'kick', 'riser']);
+  it('a fill silences the tracks it cuts while its notes play, and only those', () => {
+    const { events } = schedule(song({ group: 'fills', cut: ['kick'] }));
+    expect(events.filter((e) => e.step >= 16).map((e) => e.trackId).sort()).toEqual(['lead', 'lead', 'lead', 'lead', 'riser']);
+    expect(events.filter((e) => e.step < 16 && e.trackId === 'kick')).toHaveLength(4);
   });
 
   it('without cut, a fill is just another track', () => {
     expect(schedule(song({ group: 'fills' })).events.filter((e) => e.step >= 16).length).toBe(9);
   });
 
-  it('a muted cutting track cuts nothing', () => {
-    expect(schedule(song({ group: 'fills', cut: true, mute: true })).events.filter((e) => e.trackId === 'kick')).toHaveLength(8);
+  it('a muted fill cuts nothing', () => {
+    expect(schedule(song({ cut: ['kick'], mute: true })).events.filter((e) => e.trackId === 'kick')).toHaveLength(8);
+  });
+
+  it('refuses cutting a track that is not there', () => {
+    try {
+      song({ cut: ['kik'] });
+      expect.unreachable();
+    } catch (e) {
+      expect((e as SongError).issues).toEqual(['tracks.riser.cut: no track "kik"']);
+    }
   });
 
   it('a group is a short lowercase name', () => {

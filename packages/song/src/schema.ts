@@ -141,9 +141,10 @@ const trackShape = {
   highpass: z.number().min(20).max(20000).optional().describe('Cut below this many Hz (keep non-bass tracks out of the kick, ~150)'),
   group: Id.optional().describe('The editor group the track sits in, e.g. "fills"; default worked out from its sound'),
   cut: z
-    .boolean()
+    .array(Id)
+    .min(1)
     .optional()
-    .describe('While this track plays a note, every track outside its group is silent: a fill with an empty bar'),
+    .describe('Track ids this track replaces: they are silent while it plays a note (a fill taking over from the kick and bass)'),
 };
 
 export const Track = z.object({ ...trackShape, patterns: z.record(Id, Pattern) });
