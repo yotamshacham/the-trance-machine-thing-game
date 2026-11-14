@@ -6,7 +6,6 @@
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import type { Plugin } from 'vite';
-import { parseSong, stringifySong } from '@ttm/song';
 import { REQUESTS_FILE, addRequest, readRequests, writeRequests, type Request } from './requests.ts';
 
 /** The song file a request path names, or undefined if it isn't a plain `name.json` in the folder. */
@@ -32,7 +31,12 @@ export function localSongs(dir: string): Plugin {
       server.watcher.on('change', changed);
       server.watcher.on('unlink', changed);
 
-      server.middlewares.use('/local-songs', (req, res) => {
+      // the song format as it is now: loaded through Vite on each request, not once with this
+      // config, so a change to packages/song applies without restarting the dev server
+      const songFormat = () => server.ssrLoadModule('@ttm/song') as Promise<typeof import('@ttm/song')>;
+
+      server.middlewares.use('/local-songs', async (req, res) => {
+        const { parseSong, stringifySong } = await songFormat();
         const send = (status: number, body?: unknown) => {
           res.statusCode = status;
           if (body === undefined) return res.end();
