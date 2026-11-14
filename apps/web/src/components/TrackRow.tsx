@@ -1,6 +1,6 @@
 import { noteName, toMidi, type Track } from '@ttm/song';
 import { findSound, type Bank } from '../bank.ts';
-import { PEN_PITCHES, soundFor, soundGroups, soundKey } from '../instruments.ts';
+import { PEN_PITCHES, isLoop, isMelodic, soundFor, soundGroups, soundKey, soundsOf } from '../instruments.ts';
 import type { Action } from '../state.ts';
 import type { Ask } from '../requests.ts';
 import { AskClaude } from './AskClaude.tsx';
@@ -38,9 +38,16 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
   };
   // a bank sound: step through the others in its group
   const found = findSound(banks, track.instrument);
-  const siblings = found ? found.bank.sounds.filter((s) => s.group === found.sound.group) : [];
+  // a melody track isn't offered loops: they play their own riff, not the notes
+  const forTrack = { melodic: isMelodic(track) };
+  const loopOnMelody = forTrack.melodic && isLoop(track.instrument);
+  const siblings = found ? soundsOf(found.bank, found.sound.group, forTrack) : [];
   const index = found ? siblings.indexOf(found.sound) : -1;
-  const step = (by: number) => setInstrument(siblings[(index + by + siblings.length) % siblings.length]!.instrument);
+  const step = (by: number) => {
+    if (!siblings.length) return;
+    const from = index < 0 ? (by > 0 ? -1 : 0) : index;
+    setInstrument(siblings[(from + by + siblings.length) % siblings.length]!.instrument);
+  };
 
   const soundName =
     found?.sound.label ??
@@ -72,9 +79,9 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
         </div>
         <div className="track-line">
           <SoundSelect
-            groups={soundGroups(banks)}
+            groups={soundGroups(banks, forTrack)}
             value={soundKey(track.instrument, banks)}
-            onChange={(key) => setInstrument(soundFor(key, track.instrument, banks).instrument)}
+            onChange={(key) => setInstrument(soundFor(key, track.instrument, banks, forTrack).instrument)}
           />
           <input
             type="range"
@@ -96,11 +103,17 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
               aria-label={found.sound.group}
               title={`${found.bank.name} · ${found.sound.group} · ${index + 1} of ${siblings.length}`}
             >
+              {index < 0 && <option value={-1} disabled>{found.sound.label}</option>}
               {siblings.map((s, i) => (
                 <option key={i} value={i}>{s.label}</option>
               ))}
             </select>
             <button onClick={() => step(1)} title="Next sound">▶</button>
+          </div>
+        )}
+        {loopOnMelody && (
+          <div className="track-line loop-warning">
+            This is a loop: it plays its own riff, not these notes. Pick a one-shot (Tonal hits, a synth) for a melody.
           </div>
         )}
         {track.instrument.kind === 'sampler' && !found && typeof track.instrument.sample !== 'string' && (

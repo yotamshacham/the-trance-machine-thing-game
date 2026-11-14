@@ -16,6 +16,8 @@ defaults, not rules; when the user asks for something else, do that.
 - **Clap/snare** on 2 and 4 (`....x.......x...`), often only in the drop.
 - **Acid / lead**: 1–2 bar 16th-note phrases in the scale, octave jumps, accents (`!`) and
   slides (`~`) for squelch. Repetition with small changes beats new material.
+- **Loops** (a sampler with `bpm`) play their own riff: give a loop track one note per phrase
+  (`len` = the loop's length), never a melody. Melodies go on synths or one-shot samples (Tonal hits).
 - **Pad**: long chords (`notes` with `len` 32–64) for breakdowns.
 
 ## Arrangement
