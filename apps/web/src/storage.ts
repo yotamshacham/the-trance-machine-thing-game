@@ -86,3 +86,22 @@ export function saveFolds(folds: Folds): void {
     // not kept this time
   }
 }
+
+const HEAD_KEY = 'ttm.headWidth';
+
+/** Width in px of the tracks' controls column, as dragged on this browser. */
+export function loadHeadWidth(): number {
+  try {
+    return Number(localStorage.getItem(HEAD_KEY)) || 280;
+  } catch {
+    return 280;
+  }
+}
+
+export function saveHeadWidth(px: number): void {
+  try {
+    localStorage.setItem(HEAD_KEY, String(Math.round(px)));
+  } catch {
+    // not kept this time
+  }
+}

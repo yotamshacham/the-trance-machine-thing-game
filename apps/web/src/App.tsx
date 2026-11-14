@@ -1,16 +1,17 @@
 import { STEPS_PER_BAR, defaultPitchOf, sectionStarts, type Song } from '@ttm/song';
 import { loadBanks, type Bank } from './bank.ts';
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useEffect, useMemo, useReducer, useState, type CSSProperties } from 'react';
 import { AddTrack } from './components/AddTrack.tsx';
 import { Arrangement } from './components/Arrangement.tsx';
 import { Header, type LoopMode } from './components/Header.tsx';
 import { TrackRow } from './components/TrackRow.tsx';
 import { initialState, reducer } from './state.ts';
-import { loadFolds, save, saveFolds, type Folds } from './storage.ts';
+import { loadFolds, loadHeadWidth, save, saveFolds, saveHeadWidth, type Folds } from './storage.ts';
 import { useEngine } from './useEngine.ts';
 import { useLocalSong } from './useLocalSong.ts';
 import { useRequests } from './requests.ts';
 import { Requests } from './components/Requests.tsx';
+import { Splitter } from './components/Splitter.tsx';
 import { TrackGroup } from './components/TrackGroup.tsx';
 import { groupTracks } from './groups.ts';
 
@@ -23,6 +24,7 @@ export function App({ initial }: { initial: Song }) {
   const [error, setError] = useState<string>();
   const [banks, setBanks] = useState<Bank[]>([]);
   const [folds, setFoldsState] = useState<Folds>(loadFolds);
+  const [headWidth, setHeadWidth] = useState(loadHeadWidth);
   const setFolds = (change: (f: Folds) => Folds) =>
     setFoldsState((f) => {
       const next = change(f);
@@ -120,7 +122,8 @@ export function App({ initial }: { initial: Song }) {
       )}
       <Requests requests={requests} />
       <Arrangement song={song} selected={section} playingSection={playingSection} dispatch={dispatch} ask={ask} />
-      <main className="tracks">
+      <main className="tracks" style={{ '--head': `${headWidth}px` } as CSSProperties}>
+        <Splitter value={headWidth} min={200} max={640} onChange={setHeadWidth} onDone={saveHeadWidth} />
         {groupTracks(song.tracks, banks).map((group) => (
           <TrackGroup
             key={group.id}
