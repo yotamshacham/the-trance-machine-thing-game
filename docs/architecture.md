@@ -23,6 +23,10 @@ Dependencies only point down: `web → engine, formats → song`. `song` and `fo
    slides). The `Engine` indexes them by step and plays each 16th from the Tone transport, so
    swapping the song mid-play is just re-indexing.
 4. Saving writes canonical JSON with grids wherever lossless (`stringifySong`).
+5. The playhead is drawn when a step is *heard*, not when it's scheduled: the engine delays its
+   draw callback by the output latency the browser reports, minus the ~12 ms React takes to paint,
+   plus a per-browser sync offset (footer) for speakers that under-report. The footer shows the
+   reported latency and the measured playhead offset.
 
 ## Seams for what's next
 - New file formats: an `Importer` in `packages/formats/src/registry.ts`.

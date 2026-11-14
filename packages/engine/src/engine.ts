@@ -13,8 +13,10 @@ interface Strip {
 }
 
 export class Engine {
-  /** called (on the animation frame) with each step as it sounds */
-  onStep: ((step: number) => void) | undefined;
+  /** called (on the animation frame) with each step as it sounds, and the audio-clock time it sounds at */
+  onStep: ((step: number, at: number) => void) | undefined;
+  /** seconds the playhead waits after a note's scheduled time, to land when it's heard */
+  visualDelay = 0;
 
   private readonly master = new Tone.Limiter(-1).toDestination();
   private readonly strips = new Map<string, Strip>();
@@ -96,7 +98,7 @@ export class Engine {
     transport.stop();
     if (this.repeatId !== undefined) transport.clear(this.repeatId);
     this.repeatId = undefined;
-    this.onStep?.(-1);
+    this.onStep?.(-1, 0);
   }
 
   /** Play one track's note now, e.g. when a step is switched on. */
@@ -105,6 +107,17 @@ export class Engine {
     if (!strip || !this.song) return;
     const e: NoteEvent = { step: 0, trackId, pitch, vel: 0.8, len: 1, slideIn: false, slideOut: false };
     strip.voice.play(e, Tone.now() + 0.01, stepSeconds(this.song.bpm) * 2);
+  }
+
+  /** The audio clock, in seconds: what note times are measured against. */
+  audioTime(): number {
+    return Tone.getContext().rawContext.currentTime;
+  }
+
+  /** Seconds from the audio clock reaching a time to it coming out of the speakers, as the browser reports it. */
+  outputLatency(): number {
+    const raw = Tone.getContext().rawContext as AudioContext;
+    return (raw.baseLatency ?? 0) + (raw.outputLatency ?? 0);
   }
 
   /** Resolves once every sample asked for so far has loaded (or failed). */
@@ -133,6 +146,6 @@ export class Engine {
     const d = stepSeconds(this.song.bpm);
     const at = time + (step % 2 === 1 ? (this.song.swing ?? 0) * d : 0);
     for (const e of this.byStep.get(step) ?? []) this.strips.get(e.trackId)?.voice.play(e, at, e.len * d);
-    Tone.getDraw().schedule(() => this.onStep?.(step), at);
+    Tone.getDraw().schedule(() => this.onStep?.(step, at), at + this.visualDelay);
   }
 }

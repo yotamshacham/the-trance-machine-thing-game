@@ -381,3 +381,16 @@ button.icon {
     width: 100%;
   }
 }
+
+.latency {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+button.tiny {
+  padding: 0 6px;
+  margin: 0 4px;
+  font-size: 12px;
+  line-height: 16px;
+}
