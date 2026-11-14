@@ -66,4 +66,18 @@ describe('parts: which group a track belongs to', () => {
       ['leads', 'Leads', ['lead']],
     ]);
   });
+
+  it('a track that names its group goes there: fills, or a group of its own', () => {
+    const tracks = [
+      { ...track('riser', { kind: 'synth', preset: 'noise', swell: true }), group: 'fills' },
+      { ...track('roll', { kind: 'drum', voice: 'snare' }), group: 'fills' },
+      track('kick', { kind: 'drum', voice: 'kick' }),
+      { ...track('vox', { kind: 'sampler', sample: '/v.wav' }), group: 'vocal-chops' },
+    ];
+    expect(groupTracks(tracks, banks).map((g) => [g.id, g.name, g.tracks.map((t) => t.id)])).toEqual([
+      ['kick-bass', 'Kick & bass', ['kick']],
+      ['fills', 'Fills', ['riser', 'roll']],
+      ['vocal-chops', 'Vocal chops', ['vox']],
+    ]);
+  });
 });

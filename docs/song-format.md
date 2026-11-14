@@ -77,6 +77,14 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
   - Samples under `/local-samples/…` come from a local bank (`docs/samples.md`) and play only on
     the dev server of a computer that has those packs.
 
+## Fills
+Fills are ordinary tracks, usually in the `fills` group:
+- `"group": "fills"` puts a track in the editor's Fills group (any lowercase name makes a group of its own).
+- `"cut": true`: while the track plays a note, every track **outside its group** is silent: the empty bar.
+  Tracks in the same group (a snare roll with the riser) keep playing. A muted track cuts nothing.
+- A riser: `{"kind": "synth", "preset": "noise", "swell": true}`: noise that fades in over each note's
+  length, so one note `len` 16 rises from silence across a bar. `swell` works on any synth (pad swells).
+
 ## Mix and effects
 Each track can also say how it sits in the mix (all optional, 0 when left out):
 

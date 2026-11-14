@@ -68,7 +68,23 @@ export function scheduleSections(song: Song, sections: Section[]): Schedule {
     start = end;
   }
   events.sort((a, b) => a.step - b.step);
-  return { events: linkSlides(events), length: start };
+  return { events: linkSlides(cut(song, events)), length: start };
+}
+
+/** While a cutting track's note plays, tracks outside its group are silent (a fill's empty bar). */
+function cut(song: Song, events: Pending[]): Pending[] {
+  const tracks = new Map(song.tracks.map((t) => [t.id, t]));
+  const spans = events
+    .filter((e) => {
+      const t = tracks.get(e.trackId);
+      return t?.cut && !t.mute;
+    })
+    .map((e) => ({ from: e.step, to: e.step + e.len, trackId: e.trackId, group: tracks.get(e.trackId)!.group }));
+  if (!spans.length) return events;
+  return events.filter((e) => {
+    const group = tracks.get(e.trackId)?.group;
+    return !spans.some((s) => e.step >= s.from && e.step < s.to && e.trackId !== s.trackId && (s.group === undefined || group !== s.group));
+  });
 }
 
 type Pending = NoteEvent & { slide: boolean };

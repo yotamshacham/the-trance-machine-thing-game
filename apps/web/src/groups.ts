@@ -4,13 +4,14 @@
 import type { Track } from '@ttm/song';
 import { findSound, type Bank } from './bank.ts';
 
-export type Part = 'kick-bass' | 'drums' | 'leads' | 'pads-fx' | 'other';
+export type Part = 'kick-bass' | 'drums' | 'leads' | 'pads-fx' | 'fills' | 'other';
 
 export const PARTS: { id: Part; name: string }[] = [
   { id: 'kick-bass', name: 'Kick & bass' },
   { id: 'drums', name: 'Drums' },
   { id: 'leads', name: 'Leads' },
   { id: 'pads-fx', name: 'Pads & FX' },
+  { id: 'fills', name: 'Fills' },
   { id: 'other', name: 'Other' },
 ];
 
@@ -35,11 +36,21 @@ export function partOf(track: Track, banks: Bank[]): Part {
 }
 
 export interface TrackGroup {
-  id: Part;
+  /** a part, or a group a song named itself */
+  id: string;
   name: string;
   tracks: Track[];
 }
 
+/** The group a track sits in: the one it names, else the part its sound suggests. */
+export const groupOf = (track: Track, banks: Bank[]): string => track.group ?? partOf(track, banks);
+
+/** The parts in their order, then any groups the song named itself, in the order they first appear. */
 export function groupTracks(tracks: Track[], banks: Bank[]): TrackGroup[] {
-  return PARTS.map((p) => ({ ...p, tracks: tracks.filter((t) => partOf(t, banks) === p.id) })).filter((g) => g.tracks.length);
+  const known = new Set<string>(PARTS.map((p) => p.id));
+  const own = [...new Set(tracks.map((t) => groupOf(t, banks)).filter((g) => !known.has(g)))];
+  const name = (id: string) => id.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
+  return [...PARTS, ...own.map((id) => ({ id, name: name(id) }))]
+    .map((g) => ({ ...g, tracks: tracks.filter((t) => groupOf(t, banks) === g.id) }))
+    .filter((g) => g.tracks.length);
 }

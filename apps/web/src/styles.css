@@ -726,3 +726,23 @@ button.icon.fold {
   padding: 2px 4px;
   min-width: 0;
 }
+
+.inline-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.inline-label select {
+  flex: 1;
+  min-width: 0;
+}
+
+.toggle.cut {
+  width: auto;
+  padding: 2px 10px;
+}

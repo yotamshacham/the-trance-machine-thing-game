@@ -80,6 +80,7 @@ function synthVoice(s: SynthSettings): Voice {
     },
   } as Partial<Tone.MonoSynthOptions>;
   const ampEnvelope = { attack: s.attack, decay: s.decay, sustain: s.sustain, release: s.release };
+  if (s.tone < 1) (options as { volume?: number }).volume = s.tone > 0 ? Tone.gainToDb(s.tone) : -Infinity;
 
   // after the notes: drive, then the LFO stages, then out
   const post = postChain(s);
@@ -90,6 +91,7 @@ function synthVoice(s: SynthSettings): Voice {
       : undefined;
   if (noise) nodes.push(noise);
   const playNoise = (e: NoteEvent, time: number, seconds: number) => {
+    if (!e.slideIn) post.noteOn(time, seconds);
     if (noise && !e.slideIn) noise.triggerAttackRelease(seconds, time, e.vel);
   };
 
@@ -161,6 +163,9 @@ function synthVoice(s: SynthSettings): Voice {
 function postChain(s: SynthSettings) {
   const input = new Tone.Gain(1);
   const stages: Tone.ToneAudioNode[] = [];
+  // swell: each note fades in from silence over its length
+  const swell = s.swell ? new Tone.Gain(0) : undefined;
+  if (swell) stages.push(swell);
   const lfos: { lfo: Tone.LFO; rate: number; target: string }[] = [];
   if (s.drive > 0) stages.push(new Tone.Distortion({ distortion: s.drive, oversample: '2x' }));
   const bpm = Tone.getTransport().bpm.value;
@@ -201,6 +206,13 @@ function postChain(s: SynthSettings) {
   return {
     input,
     output,
+    /** a note from `time` lasting `seconds`: with swell, ramp up over it */
+    noteOn(time: number, seconds: number) {
+      if (!swell) return;
+      swell.gain.cancelScheduledValues(time);
+      swell.gain.setValueAtTime(0, time);
+      swell.gain.linearRampToValueAtTime(1, time + seconds);
+    },
     setTempo(bpmNow: number) {
       for (const { lfo, rate } of lfos) lfo.frequency.value = 1 / (rate * stepSeconds(bpmNow));
       for (const stage of stages) if (stage instanceof Tone.Vibrato) stage.frequency.value = lfoRange(s.lfos.find((l) => l.target === 'pitch')!, s.cutoff, bpmNow).hz;
