@@ -674,3 +674,55 @@ button.icon.fold {
 .track-sound {
   max-width: 40%;
 }
+
+.synth-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+  border-top: 1px dashed var(--line);
+  border-bottom: 1px dashed var(--line);
+}
+
+.synth-toggle {
+  background: none;
+  border: none;
+  padding: 2px 0;
+  text-align: left;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knobs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 6px 8px;
+}
+
+.knob {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 11px;
+}
+
+.knob > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knob input[type='range'] {
+  width: 100%;
+  padding: 0;
+  accent-color: var(--violet);
+}
+
+.knob select {
+  font-size: 11px;
+  padding: 2px 4px;
+  min-width: 0;
+}

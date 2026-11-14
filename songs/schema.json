@@ -255,6 +255,111 @@
                     "type": "number",
                     "minimum": 0,
                     "maximum": 1
+                  },
+                  "filter": {
+                    "description": "Filter type, default lowpass",
+                    "type": "string",
+                    "enum": [
+                      "lowpass",
+                      "highpass",
+                      "bandpass",
+                      "notch"
+                    ]
+                  },
+                  "filterAttack": {
+                    "description": "Seconds the filter envelope takes to open",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  "filterDecay": {
+                    "description": "Seconds it takes to fall back to filterSustain: the pluck",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  "filterSustain": {
+                    "description": "How open the filter stays while the note holds, 0–1",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "unison": {
+                    "description": "Stacked detuned oscillators per note: width (supersaws ~7)",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16
+                  },
+                  "detune": {
+                    "description": "Spread of the unison voices in cents",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "noise": {
+                    "description": "White noise mixed in, shaped by the volume envelope",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "sub": {
+                    "description": "A sine at the note’s pitch underneath, for weight",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "drive": {
+                    "description": "Saturation after the filter: grit",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "lfo": {
+                    "maxItems": 2,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "target": {
+                          "type": "string",
+                          "enum": [
+                            "cutoff",
+                            "volume",
+                            "pitch",
+                            "pan"
+                          ],
+                          "description": "cutoff: filter sweeps and wobbles; volume: a trance gate; pitch: vibrato; pan: left–right"
+                        },
+                        "rate": {
+                          "type": "number",
+                          "minimum": 0.25,
+                          "maximum": 256,
+                          "description": "Length of one cycle in steps, so it follows the tempo: 1 = a 16th, 2 = an 8th, 4 = a beat, 16 = a bar"
+                        },
+                        "depth": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1,
+                          "description": "0–1: cutoff ±3 octaves at 1, volume down to silence, pitch ±1 semitone, pan fully left–right"
+                        },
+                        "shape": {
+                          "description": "Default sine; square for a hard gate",
+                          "type": "string",
+                          "enum": [
+                            "sawtooth",
+                            "square",
+                            "sine",
+                            "triangle"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "target",
+                        "rate",
+                        "depth"
+                      ],
+                      "description": "A low-frequency oscillator, synced to the tempo and to the bar"
+                    }
                   }
                 },
                 "required": [

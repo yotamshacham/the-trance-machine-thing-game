@@ -1,16 +1,18 @@
 // Tone.js nodes for each kind of instrument: the drum machine, the synth, the sampler.
 
 import * as Tone from 'tone';
-import { toMidi, type Instrument, type NoteEvent, type SamplerInstrument } from '@ttm/song';
+import { stepSeconds, toMidi, type Instrument, type NoteEvent, type SamplerInstrument } from '@ttm/song';
 import { sampleUrl } from './sample-url.ts';
-import { LOOP_FADE, drumSettings, synthSettings, type DrumSettings, type SynthSettings } from './presets.ts';
+import { LOOP_FADE, drumSettings, lfoRange, synthSettings, type DrumSettings, type SynthSettings } from './presets.ts';
 
 export interface Voice {
   output: Tone.ToneAudioNode;
   /** play one scheduled note; `seconds` is its length */
   play(e: NoteEvent, time: number, seconds: number): void;
-  /** the song's tempo, for voices that follow it (tempo-synced loops) */
+  /** the song's tempo, for voices that follow it (tempo-synced loops, LFOs) */
   setTempo?(bpm: number): void;
+  /** playback starts at `time`: restart anything cycling (LFOs) so it lines up with the bar */
+  restart?(time: number): void;
   dispose(): void;
 }
 
@@ -66,34 +68,40 @@ function drumVoice({ body, noise }: DrumSettings): Voice {
 function synthVoice(s: SynthSettings): Voice {
   const options = {
     oscillator: s.fat ? { type: `fat${s.wave}` as const, count: s.voices, spread: s.spread } : { type: s.wave },
-    filter: { type: 'lowpass' as const, Q: s.resonance, rolloff: -24 as const },
+    filter: { type: s.filterType, Q: s.resonance, rolloff: -24 as const },
     envelope: { attack: s.attack, decay: s.decay, sustain: s.sustain, release: s.release },
     filterEnvelope: {
-      attack: Math.min(s.attack, 0.01),
+      attack: s.filterAttack || Math.min(s.attack, 0.01),
       decay: s.filterDecay,
-      sustain: 0,
+      sustain: s.filterSustain,
       release: s.release,
       baseFrequency: s.cutoff,
       octaves: s.envAmount,
     },
   } as Partial<Tone.MonoSynthOptions>;
+  const ampEnvelope = { attack: s.attack, decay: s.decay, sustain: s.sustain, release: s.release };
+
+  // after the notes: drive, then the LFO stages, then out
+  const post = postChain(s);
+  const nodes: { dispose(): void }[] = [];
+  const noise =
+    s.noise > 0
+      ? new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: ampEnvelope, volume: Tone.gainToDb(s.noise) }).connect(post.input)
+      : undefined;
+  if (noise) nodes.push(noise);
+  const playNoise = (e: NoteEvent, time: number, seconds: number) => {
+    if (noise && !e.slideIn) noise.triggerAttackRelease(seconds, time, e.vel);
+  };
 
   if (s.mono) {
-    const output = new Tone.Gain(1);
-    // grit after the filter, when the preset asks for it
-    const drive = s.drive > 0 ? new Tone.Distortion({ distortion: s.drive, oversample: '2x' }).connect(output) : undefined;
-    const synth = new Tone.MonoSynth(options).connect(drive ?? output);
+    const synth = new Tone.MonoSynth(options).connect(post.input);
     const layers: (Tone.MonoSynth | Tone.Synth)[] = [synth];
     if (s.sub > 0) {
-      const sub = new Tone.Synth({
-        oscillator: { type: 'sine' },
-        envelope: { attack: s.attack, decay: s.decay, sustain: s.sustain, release: s.release },
-        volume: Tone.gainToDb(s.sub),
-      }).connect(output);
-      layers.push(sub);
+      layers.push(new Tone.Synth({ oscillator: { type: 'sine' }, envelope: ampEnvelope, volume: Tone.gainToDb(s.sub) }).connect(post.input));
     }
+    nodes.push(...layers);
     return {
-      output,
+      output: post.output,
       play(e, time, seconds) {
         const freq = Tone.mtof(e.pitch as Tone.Unit.MidiNote);
         for (const layer of layers) {
@@ -110,22 +118,107 @@ function synthVoice(s: SynthSettings): Voice {
           }
           if (!e.slideOut) layer.triggerRelease(time + seconds);
         }
+        playNoise(e, time, seconds);
       },
+      setTempo: post.setTempo,
+      restart: post.restart,
       dispose: () => {
-        for (const layer of layers) layer.dispose();
-        drive?.dispose();
-        output.dispose();
+        for (const n of nodes) n.dispose();
+        post.dispose();
       },
     };
   }
-  const synth = new Tone.PolySynth(Tone.MonoSynth, options);
+  const synth = new Tone.PolySynth(Tone.MonoSynth, options).connect(post.input);
   synth.maxPolyphony = 16;
+  nodes.push(synth);
+  const sub =
+    s.sub > 0
+      ? new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: ampEnvelope, volume: Tone.gainToDb(s.sub) }).connect(post.input)
+      : undefined;
+  if (sub) nodes.push(sub);
   return {
-    output: synth,
+    output: post.output,
     play(e, time, seconds) {
-      synth.triggerAttackRelease(Tone.mtof(e.pitch as Tone.Unit.MidiNote), seconds, time, e.vel);
+      const freq = Tone.mtof(e.pitch as Tone.Unit.MidiNote);
+      synth.triggerAttackRelease(freq, seconds, time, e.vel);
+      sub?.triggerAttackRelease(freq, seconds, time, e.vel);
+      playNoise(e, time, seconds);
     },
-    dispose: () => synth.dispose(),
+    setTempo: post.setTempo,
+    restart: post.restart,
+    dispose: () => {
+      for (const n of nodes) n.dispose();
+      post.dispose();
+    },
+  };
+}
+
+/**
+ * What follows a synth's notes: drive, then one stage per LFO (a swept filter for cutoff, a gain
+ * for volume, a vibrato for pitch, a panner for pan). LFOs restart with the transport, so a gate
+ * or a sweep lines up with the bar.
+ */
+function postChain(s: SynthSettings) {
+  const input = new Tone.Gain(1);
+  const stages: Tone.ToneAudioNode[] = [];
+  const lfos: { lfo: Tone.LFO; rate: number; target: string }[] = [];
+  if (s.drive > 0) stages.push(new Tone.Distortion({ distortion: s.drive, oversample: '2x' }));
+  const bpm = Tone.getTransport().bpm.value;
+  for (const l of s.lfos) {
+    const r = lfoRange(l, s.cutoff, bpm);
+    const lfo = new Tone.LFO({ frequency: r.hz, min: r.min, max: r.max, type: r.shape });
+    let stage: Tone.ToneAudioNode;
+    if (l.target === 'cutoff') {
+      const filter = new Tone.Filter({ type: 'lowpass', frequency: s.cutoff, Q: 1 });
+      lfo.connect(filter.frequency);
+      stage = filter;
+    } else if (l.target === 'volume') {
+      const gain = new Tone.Gain(1);
+      lfo.connect(gain.gain);
+      stage = gain;
+    } else if (l.target === 'pitch') {
+      // a short modulated delay bends the pitch: ±1 semitone at full depth, roughly
+      const vibrato = new Tone.Vibrato({ frequency: r.hz, depth: l.depth * 0.5, type: r.shape });
+      stage = vibrato;
+    } else {
+      const panner = new Tone.Panner(0);
+      lfo.connect(panner.pan);
+      stage = panner;
+    }
+    if (l.target !== 'pitch') {
+      lfo.start();
+      lfos.push({ lfo, rate: l.rate, target: l.target });
+    } else lfo.dispose();
+    stages.push(stage);
+  }
+  const output = new Tone.Gain(1);
+  let at: Tone.ToneAudioNode = input;
+  for (const stage of stages) {
+    at.connect(stage);
+    at = stage;
+  }
+  at.connect(output);
+  return {
+    input,
+    output,
+    setTempo(bpmNow: number) {
+      for (const { lfo, rate } of lfos) lfo.frequency.value = 1 / (rate * stepSeconds(bpmNow));
+      for (const stage of stages) if (stage instanceof Tone.Vibrato) stage.frequency.value = lfoRange(s.lfos.find((l) => l.target === 'pitch')!, s.cutoff, bpmNow).hz;
+    },
+    /** start the LFOs' cycles at `time`: the top of the bar */
+    restart(time: number) {
+      // a stop and a start a hair later: the cycle begins again from its start
+      for (const { lfo } of lfos) {
+        lfo.stop(time);
+        lfo.start(time + 0.0005);
+      }
+    },
+    dispose() {
+      for (const { lfo } of lfos) lfo.dispose();
+      for (const stage of stages) stage.dispose();
+      input.dispose();
+      output.dispose();
+    },
   };
 }
 
