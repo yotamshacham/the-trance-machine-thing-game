@@ -5,7 +5,8 @@
 - Drum machine (8 synthesized voices), 6 synth presets with acid slides, URL sampler.
 - Tracker UI: sections, per-track patterns, step grid, mute/solo/volume, undo, autosave.
 - MIDI import (GM drums mapped, 16th quantize, 4-bar sections deduped into patterns) and export.
-- `songs/basic-psy.json` template.
+- `songs/basic-psy.json` template; Goa Sunrise and Night Forest examples.
+- Local sample banks (Futurephonic: 796 sounds, multisampled basses, tempo-synced loops), dev server only.
 
 ## Next
 - Hear and tune the default sounds (kick and bass especially) against reference tracks.
@@ -17,4 +18,5 @@
   Wrap existing open-source converters (VGMTrans family, libgme) rather than writing emulators.
   Prior work: video-game-psytrance-tool's `FormatAdapter` and discovery catalog of VGM archives.
 - Sample library (CC0) and user samples in IndexedDB (`docs/samples.md`).
+- Loop start offsets (play bars 9–16 of a loop) and a sample tuning offset (the Futurephonic basses sit ~40 cents flat).
 - Offline render to WAV.

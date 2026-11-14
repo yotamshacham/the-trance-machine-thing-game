@@ -1,10 +1,17 @@
 // A song → the notes it plays, in absolute steps. What the engine plays and the tests check.
 
 import { toMidi } from './pitch.ts';
-import { STEPS_PER_BAR, STEPS_PER_BEAT, type Section, type Song } from './schema.ts';
+import { STEPS_PER_BAR, STEPS_PER_BEAT, type Instrument, type Section, type Song } from './schema.ts';
 
-/** The pitch a synth or sampler note without one plays. */
+/** The pitch a synth note without one plays. */
 export const DEFAULT_PITCH = 'C3';
+
+/** The pitch a note without one plays on this instrument: a sample's own pitch, else C3. */
+export function defaultPitchOf(instrument: Instrument): string {
+  if (instrument.kind !== 'sampler') return DEFAULT_PITCH;
+  if (typeof instrument.sample === 'string') return instrument.root ?? DEFAULT_PITCH;
+  return Object.keys(instrument.sample).sort((a, b) => toMidi(a) - toMidi(b))[0] ?? DEFAULT_PITCH;
+}
 export const DEFAULT_VELOCITY = 0.8;
 
 export interface NoteEvent {
@@ -41,13 +48,14 @@ export function scheduleSections(song: Song, sections: Section[]): Schedule {
       const pattern = patternId === undefined ? undefined : track.patterns[patternId];
       if (!pattern) continue;
       const drum = track.instrument.kind === 'drum';
+      const fallback = defaultPitchOf(track.instrument);
       for (let at = start; at < end; at += pattern.length) {
         for (const n of pattern.notes) {
           if (at + n.step >= end) break;
           events.push({
             step: at + n.step,
             trackId: track.id,
-            pitch: drum ? null : toMidi(n.pitch ?? DEFAULT_PITCH),
+            pitch: drum ? null : toMidi(n.pitch ?? fallback),
             vel: n.vel ?? DEFAULT_VELOCITY,
             len: n.len ?? 1,
             slideIn: false,

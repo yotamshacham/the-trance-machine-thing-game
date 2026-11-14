@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { schedule, scheduleSections, sectionStarts, stepTime } from './schedule.ts';
+import { defaultPitchOf, schedule, scheduleSections, sectionStarts, stepTime } from './schedule.ts';
 import { parseSong } from './song.ts';
 
 const song = parseSong({
@@ -61,5 +61,26 @@ describe('stepTime', () => {
     expect(stepTime(4, 120)).toBeCloseTo(0.5);
     expect(stepTime(1, 120, 0.5)).toBeCloseTo(0.125 + 0.0625);
     expect(stepTime(2, 120, 0.5)).toBeCloseTo(0.25);
+  });
+});
+
+describe('defaultPitchOf', () => {
+  it('is C3 for synths, a sample’s root, or a multisample’s lowest note', () => {
+    expect(defaultPitchOf({ kind: 'synth', preset: 'acid' })).toBe('C3');
+    expect(defaultPitchOf({ kind: 'sampler', sample: '/a.wav', root: 'F#3' })).toBe('F#3');
+    expect(defaultPitchOf({ kind: 'sampler', sample: '/a.wav' })).toBe('C3');
+    expect(defaultPitchOf({ kind: 'sampler', sample: { B1: '/b.wav', 'C#1': '/c.wav' } })).toBe('C#1');
+  });
+
+  it('is what pitchless sampler notes play', () => {
+    const s = parseSong({
+      format: 'ttm-song',
+      version: 1,
+      title: 't',
+      bpm: 120,
+      tracks: [{ id: 'hit', name: 'Hit', instrument: { kind: 'sampler', sample: '/hit.wav', root: 'A2' }, patterns: { a: { grid: 'x...' } } }],
+      arrangement: [{ name: 'A', bars: 1, play: { hit: 'a' } }],
+    });
+    expect(schedule(s).events[0]!.pitch).toBe(45);
   });
 });

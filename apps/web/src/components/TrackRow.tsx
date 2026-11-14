@@ -1,6 +1,8 @@
 import { noteName, toMidi, type Track } from '@ttm/song';
-import { DRUM_CHOICES, PEN_PITCHES, SYNTH_CHOICES, choiceKey, instrumentForKey } from '../instruments.ts';
+import { findSound, type Bank } from '../bank.ts';
+import { PEN_PITCHES, soundFor, soundGroups, soundKey } from '../instruments.ts';
 import type { Action } from '../state.ts';
+import { SoundSelect } from './SoundSelect.tsx';
 import { StepGrid } from './StepGrid.tsx';
 
 interface Props {
@@ -10,16 +12,28 @@ interface Props {
   playing: number;
   solo: boolean;
   pen: string;
+  banks: Bank[];
   dispatch(action: Action): void;
   onSolo(on: boolean): void;
   onPen(pitch: string): void;
   onPreview(pitch: number | null): void;
+  /** play the track's sound once it has loaded (after it was changed) */
+  onAudition(): void;
 }
 
-export function TrackRow({ track, patternId, playing, solo, pen, dispatch, onSolo, onPen, onPreview }: Props) {
+export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch, onSolo, onPen, onPreview, onAudition }: Props) {
   const pattern = patternId ? track.patterns[patternId] : undefined;
   const drum = track.instrument.kind === 'drum';
   const update = (change: Partial<Omit<Track, 'id' | 'patterns'>>) => dispatch({ type: 'update-track', trackId: track.id, change });
+  const setInstrument = (instrument: Track['instrument']) => {
+    update({ instrument });
+    onAudition();
+  };
+  // a bank sound: step through the others in its group
+  const found = findSound(banks, track.instrument);
+  const siblings = found ? found.bank.sounds.filter((s) => s.group === found.sound.group) : [];
+  const index = found ? siblings.indexOf(found.sound) : -1;
+  const step = (by: number) => setInstrument(siblings[(index + by + siblings.length) % siblings.length]!.instrument);
 
   return (
     <div className={`track ${track.mute ? 'muted' : ''}`}>
@@ -37,23 +51,11 @@ export function TrackRow({ track, patternId, playing, solo, pen, dispatch, onSol
           </button>
         </div>
         <div className="track-line">
-          <select
-            value={choiceKey(track.instrument)}
-            onChange={(e) => update({ instrument: instrumentForKey(e.target.value, track.instrument) })}
-            aria-label="Sound"
-          >
-            <optgroup label="Drum machine">
-              {DRUM_CHOICES.map((c) => (
-                <option key={c.key} value={c.key}>{c.label}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Synth">
-              {SYNTH_CHOICES.map((c) => (
-                <option key={c.key} value={c.key}>{c.label}</option>
-              ))}
-            </optgroup>
-            <option value="sampler">Sampler</option>
-          </select>
+          <SoundSelect
+            groups={soundGroups(banks)}
+            value={soundKey(track.instrument, banks)}
+            onChange={(key) => setInstrument(soundFor(key, track.instrument, banks).instrument)}
+          />
           <input
             type="range"
             min={-30}
@@ -65,7 +67,28 @@ export function TrackRow({ track, patternId, playing, solo, pen, dispatch, onSol
             aria-label="Volume"
           />
         </div>
-        {track.instrument.kind === 'sampler' && (
+        {found && (
+          <div className="track-line">
+            <button onClick={() => step(-1)} title="Previous sound">◀</button>
+            <select
+              value={index}
+              onChange={(e) => setInstrument(siblings[Number(e.target.value)]!.instrument)}
+              aria-label={found.sound.group}
+              title={`${found.bank.name} · ${found.sound.group} · ${index + 1} of ${siblings.length}`}
+            >
+              {siblings.map((s, i) => (
+                <option key={i} value={i}>{s.label}</option>
+              ))}
+            </select>
+            <button onClick={() => step(1)} title="Next sound">▶</button>
+          </div>
+        )}
+        {track.instrument.kind === 'sampler' && !found && typeof track.instrument.sample !== 'string' && (
+          <div className="track-line muted-text">
+            Multisample, {Object.keys(track.instrument.sample).length} notes (not found in a bank on this computer)
+          </div>
+        )}
+        {track.instrument.kind === 'sampler' && !found && typeof track.instrument.sample === 'string' && (
           <div className="track-line">
             <input
               className="sample-url"

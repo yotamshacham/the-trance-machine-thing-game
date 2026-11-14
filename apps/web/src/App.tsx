@@ -1,4 +1,5 @@
-import { STEPS_PER_BAR, sectionStarts, type Song } from '@ttm/song';
+import { STEPS_PER_BAR, defaultPitchOf, sectionStarts, type Song } from '@ttm/song';
+import { loadBanks, type Bank } from './bank.ts';
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import { AddTrack } from './components/AddTrack.tsx';
 import { Arrangement } from './components/Arrangement.tsx';
@@ -15,6 +16,11 @@ export function App({ initial }: { initial: Song }) {
   const [solo, setSolo] = useState<Set<string>>(new Set());
   const [pens, setPens] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>();
+  const [banks, setBanks] = useState<Bank[]>([]);
+
+  useEffect(() => {
+    void loadBanks().then(setBanks);
+  }, []);
 
   const current = song.arrangement[section]!;
   const loop = useMemo(() => (loopMode === 'section' ? [current] : undefined), [loopMode, current]);
@@ -64,10 +70,11 @@ export function App({ initial }: { initial: Song }) {
     if (pens[trackId]) return pens[trackId];
     // the pitch the track uses most, so a click continues its line
     const counts = new Map<string, number>();
-    for (const p of Object.values(song.tracks.find((t) => t.id === trackId)?.patterns ?? {})) {
+    const track = song.tracks.find((t) => t.id === trackId)!;
+    for (const p of Object.values(track.patterns)) {
       for (const n of p.notes) if (n.pitch) counts.set(n.pitch, (counts.get(n.pitch) ?? 0) + 1);
     }
-    return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'C3';
+    return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? defaultPitchOf(track.instrument);
   };
 
   return (
@@ -116,10 +123,12 @@ export function App({ initial }: { initial: Song }) {
               }}
               onPen={(pitch) => setPens((p) => ({ ...p, [track.id]: pitch }))}
               onPreview={(pitch) => void engine.preview(track.id, pitch)}
+              onAudition={() => engine.audition(track.id)}
+              banks={banks}
             />
           );
         })}
-        <AddTrack dispatch={dispatch} />
+        <AddTrack banks={banks} dispatch={dispatch} />
       </main>
       <footer className="footer">
         <span>

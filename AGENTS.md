@@ -31,7 +31,8 @@ and how to verify it; read it before working inside that package. Where code goe
 
 ## Ground rules
 - Sound is synthesized in code or comes from samples we may redistribute (CC0 or our own).
-  Commercial packs (Splice etc.) stay in gitignored `samples/private/`. See `docs/samples.md`.
+  Licensed packs (Futurephonic, Splice…) are local banks: linked in gitignored `samples/private/`,
+  served by the dev server only, never committed or deployed. See `docs/samples.md`.
 - Imported material (game rips, MIDI from the web) is never committed; tests build their inputs in code.
 - Musical taste is the user's: when a choice is aesthetic, offer options and ask.
 

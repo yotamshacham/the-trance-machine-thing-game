@@ -60,6 +60,13 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
   opens), `attack decay sustain release` seconds, `glide` seconds. `rolling-bass`, `acid` and `sub`
   are mono (slides work); the rest are polyphonic.
 - `{"kind":"sampler","sample":url,"root":"C3","gate":false}`: plays an audio file, repitched from `root`.
-  Without `gate` it plays the sample out; with it, it's cut at the note's length.
+  Without `gate` it plays the sample out; with it, it's cut at the note's length. Pitchless notes play `root`.
+  - **Multisample**: `"sample": {"C1": url, "C#1": url, …}`, each file recorded at its note; a note
+    plays the nearest one, repitched. Pitchless notes play the lowest.
+  - **Loop**: add `"bpm": 135`, the loop's own tempo. It's stretched to the song's tempo (pitch
+    kept), transposed from `root` by the note's pitch, and plays for the note's length: one note
+    `len` 256 plays a 16-bar loop once.
+  - Samples under `/local-samples/…` come from a local bank (`docs/samples.md`) and play only on
+    the dev server of a computer that has those packs.
 
 Sound settings per preset live in `packages/engine/src/presets.ts`.
