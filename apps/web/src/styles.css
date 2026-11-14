@@ -508,3 +508,64 @@ button.tiny {
     animation: none;
   }
 }
+
+.track-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 8px 2px 4px;
+  text-align: left;
+}
+
+.group-head:hover:not(:disabled) {
+  border-color: var(--violet);
+}
+
+.group-name {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.fold {
+  width: 16px;
+  color: var(--muted);
+}
+
+button.icon.fold {
+  font-size: 14px;
+  padding: 0;
+}
+
+.track.folded {
+  padding-block: 4px;
+}
+
+/* folded: only the first line of controls */
+.track.folded .track-head > :not(:first-child) {
+  display: none;
+}
+
+.track-sound {
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--muted);
+}

@@ -23,9 +23,12 @@ interface Props {
   onAudition(): void;
   /** send a request about this track to the agent (only with a linked song) */
   ask: Ask | undefined;
+  /** folded: the controls fold to one line; the steps stay */
+  folded: boolean;
+  onFold(folded: boolean): void;
 }
 
-export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch, onSolo, onPen, onPreview, onAudition, ask }: Props) {
+export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch, onSolo, onPen, onPreview, onAudition, ask, folded, onFold }: Props) {
   const pattern = patternId ? track.patterns[patternId] : undefined;
   const drum = track.instrument.kind === 'drum';
   const update = (change: Partial<Omit<Track, 'id' | 'patterns'>>) => dispatch({ type: 'update-track', trackId: track.id, change });
@@ -39,10 +42,22 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
   const index = found ? siblings.indexOf(found.sound) : -1;
   const step = (by: number) => setInstrument(siblings[(index + by + siblings.length) % siblings.length]!.instrument);
 
+  const soundName =
+    found?.sound.label ??
+    (track.instrument.kind === 'drum' ? track.instrument.voice : track.instrument.kind === 'synth' ? track.instrument.preset : 'sampler');
+
   return (
-    <div className={`track ${track.mute ? 'muted' : ''}`}>
+    <div className={`track ${track.mute ? 'muted' : ''} ${folded ? 'folded' : ''}`}>
       <div className="track-head">
         <div className="track-line">
+          <button
+            className="icon fold"
+            onClick={() => onFold(!folded)}
+            aria-expanded={!folded}
+            title={folded ? 'Show this track’s controls' : 'Fold this track’s controls'}
+          >
+            {folded ? '▸' : '▾'}
+          </button>
           <button className={`toggle ${track.mute ? 'active' : ''}`} onClick={() => update({ mute: !track.mute })} title="Mute">
             M
           </button>
@@ -50,6 +65,7 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
             S
           </button>
           <input className="track-name" value={track.name} onChange={(e) => update({ name: e.target.value })} aria-label="Track name" />
+          {folded && <span className="track-sound" title={soundName}>{soundName}</span>}
           <button className="icon" onClick={() => dispatch({ type: 'remove-track', trackId: track.id })} title="Remove track (undo brings it back)">
             ×
           </button>
