@@ -19,6 +19,13 @@ export interface Smf {
   trackNames: (string | undefined)[];
   /** the first tempo, if the file has one */
   bpm?: number;
+  /** every tempo change in the file, from any track, in tick order */
+  tempos: TempoChange[];
+}
+
+export interface TempoChange {
+  tick: number;
+  bpm: number;
 }
 
 /** A Standard MIDI File's notes by track, and its first tempo. */
@@ -28,7 +35,7 @@ export function readSmf(bytes: Uint8Array): Smf {
   if (bytes.length < 14 || String.fromCharCode(...bytes.subarray(0, 4)) !== 'MThd') throw new Error('Not a MIDI file.');
   const ppq = u16(12);
   if (ppq & 0x8000) throw new Error('A MIDI file timed in SMPTE frames has no beats to put on a grid.');
-  const smf: Smf = { ppq, tracks: [], trackNames: [] };
+  const smf: Smf = { ppq, tracks: [], trackNames: [], tempos: [] };
   let i = 8 + u32(4);
   for (let t = 0; t < u16(10) && i + 8 <= bytes.length; t++) {
     const end = Math.min(i + 8 + u32(i + 4), bytes.length);
@@ -55,7 +62,10 @@ export function readSmf(bytes: Uint8Array): Smf {
         const d = bytes.subarray(j, j + length);
         j += length;
         if (type === 0x03) name ??= String.fromCharCode(...d).trim() || undefined;
-        else if (type === 0x51 && smf.bpm === undefined) smf.bpm = 60e6 / ((d[0]! << 16) | (d[1]! << 8) | d[2]!);
+        else if (type === 0x51) {
+          const bpm = 60e6 / ((d[0]! << 16) | (d[1]! << 8) | d[2]!);
+          smf.tempos.push({ tick, bpm });
+        }
         continue;
       }
       if (bytes[j] === 0xf0 || bytes[j] === 0xf7) {
@@ -83,6 +93,8 @@ export function readSmf(bytes: Uint8Array): Smf {
     }
     i = end;
   }
+  smf.tempos.sort((a, b) => a.tick - b.tick);
+  if (smf.tempos[0]) smf.bpm = smf.tempos[0].bpm;
   return smf;
 }
 
@@ -91,9 +103,16 @@ export interface SmfTrackOut {
   notes: RawNote[];
 }
 
-/** A format 1 file: a tempo track, then one track per given track. */
-export function writeSmf(ppq: number, bpm: number, tracks: SmfTrackOut[]): Uint8Array<ArrayBuffer> {
-  const tempo = [0, 0xff, 0x51, 3, ...be(Math.round(60e6 / bpm), 3), 0, 0xff, 0x2f, 0];
+/** A format 1 file: a tempo track (`bpm`, then any later changes), then one track per given track. */
+export function writeSmf(ppq: number, bpm: number, tracks: SmfTrackOut[], changes: TempoChange[] = []): Uint8Array<ArrayBuffer> {
+  const tempoEvent = (bpm: number) => [0xff, 0x51, 3, ...be(Math.round(60e6 / bpm), 3)];
+  let at = 0;
+  const later = [...changes].sort((a, b) => a.tick - b.tick).flatMap((c) => {
+    const delta = c.tick - at;
+    at = c.tick;
+    return [...vlq(delta), ...tempoEvent(c.bpm)];
+  });
+  const tempo = [0, ...tempoEvent(bpm), ...later, 0, 0xff, 0x2f, 0];
   const chunks = [tempo, ...tracks.map(trackBytes)];
   return new Uint8Array([
     ...ascii('MThd'), ...be(6, 4), ...be(1, 2), ...be(chunks.length, 2), ...be(ppq, 2),

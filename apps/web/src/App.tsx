@@ -4,10 +4,13 @@ import { useEffect, useMemo, useReducer, useState } from 'react';
 import { AddTrack } from './components/AddTrack.tsx';
 import { Arrangement } from './components/Arrangement.tsx';
 import { Header, type LoopMode } from './components/Header.tsx';
+import { MidiPlayer } from './components/MidiPlayer.tsx';
+import { openSongFile } from './files.ts';
 import { TrackRow } from './components/TrackRow.tsx';
 import { initialState, reducer } from './state.ts';
 import { save } from './storage.ts';
 import { useEngine } from './useEngine.ts';
+import { useMidiPlayer } from './useMidiPlayer.ts';
 
 export function App({ initial }: { initial: Song }) {
   const [state, dispatch] = useReducer(reducer, initial, initialState);
@@ -25,6 +28,12 @@ export function App({ initial }: { initial: Song }) {
   const current = song.arrangement[section]!;
   const loop = useMemo(() => (loopMode === 'section' ? [current] : undefined), [loopMode, current]);
   const engine = useEngine(song, loop);
+  const midi = useMidiPlayer();
+  // one thing plays at a time
+  const playSong = () => {
+    midi.stop();
+    void engine.play();
+  };
 
   // where the playhead is: which section, and how far into it
   const { starts } = useMemo(() => sectionStarts(song), [song]);
@@ -56,7 +65,7 @@ export function App({ initial }: { initial: Song }) {
       if (e.code === 'Space' && !typing) {
         e.preventDefault();
         if (engine.playing) engine.stop();
-        else void engine.play();
+        else playSong();
       } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) {
         e.preventDefault();
         dispatch({ type: e.shiftKey ? 'redo' : 'undo' });
@@ -64,7 +73,7 @@ export function App({ initial }: { initial: Song }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [engine]);
+  }, [engine, midi]);
 
   const penFor = (trackId: string) => {
     if (pens[trackId]) return pens[trackId];
@@ -86,10 +95,13 @@ export function App({ initial }: { initial: Song }) {
         canUndo={state.past.length > 0}
         canRedo={state.future.length > 0}
         dispatch={dispatch}
-        onPlay={() => void engine.play()}
+        onPlay={playSong}
         onStop={engine.stop}
         onLoopMode={setLoopMode}
         onError={setError}
+        onListen={(file) => {
+          midi.open(file).catch((err: Error) => setError(`Couldn't play ${file.name}: ${err.message}`));
+        }}
       />
       {error && (
         <div className="error" role="alert">
@@ -97,6 +109,19 @@ export function App({ initial }: { initial: Song }) {
           <button className="icon" onClick={() => setError(undefined)} aria-label="Dismiss">×</button>
         </div>
       )}
+      <MidiPlayer
+        player={midi}
+        onPlay={() => {
+          engine.stop();
+          void midi.play(midi.position);
+        }}
+        onImport={(file) => {
+          midi.close();
+          openSongFile(file)
+            .then((imported) => dispatch({ type: 'load', song: imported }))
+            .catch((err: Error) => setError(`Couldn't import ${file.name}: ${err.message}`));
+        }}
+      />
       <Arrangement song={song} selected={section} playingSection={playingSection} dispatch={dispatch} />
       <main className="tracks">
         {song.tracks.map((track) => {

@@ -394,3 +394,53 @@ button.tiny {
   font-size: 12px;
   line-height: 16px;
 }
+
+.midi-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.midi-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.midi-name {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.midi-seek {
+  flex: 1;
+  min-width: 140px;
+  padding: 0;
+  accent-color: var(--teal);
+}
+
+.midi-clock {
+  font-variant-numeric: tabular-nums;
+}
+
+.midi-parts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.midi-part.active .muted-text {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.midi-hint {
+  font-size: 12px;
+}

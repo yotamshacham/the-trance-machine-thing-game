@@ -19,7 +19,7 @@ import {
 } from '@ttm/song';
 import { readSmf, writeSmf, type RawNote } from './smf.ts';
 
-const DRUM_CHANNEL = 9;
+export const DRUM_CHANNEL = 9;
 /** Bars per imported section (and so per imported pattern). */
 export const IMPORT_SECTION_BARS = 4;
 

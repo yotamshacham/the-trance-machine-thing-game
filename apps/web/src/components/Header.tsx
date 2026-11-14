@@ -18,10 +18,13 @@ interface Props {
   onStop(): void;
   onLoopMode(mode: LoopMode): void;
   onError(message: string): void;
+  /** open a MIDI file in the player, to listen before importing */
+  onListen(file: File): void;
 }
 
-export function Header({ song, playing, loopMode, canUndo, canRedo, dispatch, onPlay, onStop, onLoopMode, onError }: Props) {
+export function Header({ song, playing, loopMode, canUndo, canRedo, dispatch, onPlay, onStop, onLoopMode, onError, onListen }: Props) {
   const fileInput = useRef<HTMLInputElement>(null);
+  const midiInput = useRef<HTMLInputElement>(null);
   return (
     <header className="header">
       <div className="transport">
@@ -84,6 +87,18 @@ export function Header({ song, playing, loopMode, canUndo, canRedo, dispatch, on
             } catch (err) {
               onError(`Couldn't open ${file.name}: ${(err as Error).message}`);
             }
+          }}
+        />
+        <button onClick={() => midiInput.current?.click()} title="Play a MIDI file as it is, before importing it">Listen to MIDI…</button>
+        <input
+          ref={midiInput}
+          type="file"
+          hidden
+          accept=".mid,.midi"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) onListen(file);
           }}
         />
         <button onClick={() => downloadJson(song)} title="Save the song as a .json file">Save</button>

@@ -5,6 +5,7 @@
 - Drum machine (8 synthesized voices), 6 synth presets with acid slides, URL sampler.
 - Tracker UI: sections, per-track patterns, step grid, mute/solo/volume, undo, autosave.
 - MIDI import (GM drums mapped, 16th quantize, 4-bar sections deduped into patterns) and export.
+- MIDI player: listen to a `.mid` as it is (unquantized, tempo changes followed, channels mutable) before importing it.
 - `songs/basic-psy.json` template; Goa Sunrise and Night Forest examples.
 - Local sample banks (Futurephonic: 796 sounds, multisampled basses, tempo-synced loops), dev server only.
 
