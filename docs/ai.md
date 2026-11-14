@@ -15,6 +15,17 @@ file the app reloads it, while playing, as one undoable edit. Files there also s
 under *songs/local*. Use it for anything that can't be committed (songs from game rips, songs
 using local sample banks); an agent writes there directly and runs `pnpm song check` on it.
 
+### Asking from the app: requests
+With a linked song, each track, the section bar and the song have **✦ Ask**: a one-line request
+("darker bass", "make this sparser"). It waits in `songs/local/.requests.json`; the app shows it
+as waiting → working… → done, with the agent's reply. An agent serving requests loops:
+
+1. `pnpm song requests wait`: blocks until a request comes, claims it, prints it (run it in the background).
+2. Edit `songs/local/<file>` for what it asks (`pnpm song check` it); the app reloads it live.
+3. `pnpm song requests done <id> <one-line reply>` (or `failed <id> <why>`).
+
+Requests only move while an agent is running that loop.
+
 `pnpm song import <file.mid>` turns a MIDI file (a game soundtrack, a sketch) into a song an
 agent can then rework.
 

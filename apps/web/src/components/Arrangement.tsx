@@ -1,5 +1,7 @@
 import type { Song } from '@ttm/song';
+import type { Ask } from '../requests.ts';
 import type { Action } from '../state.ts';
+import { AskClaude } from './AskClaude.tsx';
 
 interface Props {
   song: Song;
@@ -7,10 +9,12 @@ interface Props {
   /** the section sounding now, or -1 */
   playingSection: number;
   dispatch(action: Action): void;
+  /** send a request about a section, or the song, to the agent (only with a linked song) */
+  ask: Ask | undefined;
 }
 
 /** The song's sections in order: click one to edit it. */
-export function Arrangement({ song, selected, playingSection, dispatch }: Props) {
+export function Arrangement({ song, selected, playingSection, dispatch, ask }: Props) {
   const section = song.arrangement[selected]!;
   const totalBars = song.arrangement.reduce((a, s) => a + s.bars, 0);
   return (
@@ -52,6 +56,8 @@ export function Arrangement({ song, selected, playingSection, dispatch }: Props)
         <button onClick={() => dispatch({ type: 'add-section' })} title="Add a copy of this section after it">+ Duplicate</button>
         <button onClick={() => dispatch({ type: 'remove-section' })} disabled={song.arrangement.length === 1}>Remove</button>
         <span className="muted-text">{totalBars} bars in all</span>
+        <AskClaude ask={ask} target={{ kind: 'section', index: selected, name: section.name }} about={`section “${section.name}”`} />
+        <AskClaude ask={ask} target={{ kind: 'song' }} about="the whole song" />
       </div>
     </section>
   );

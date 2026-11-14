@@ -19,3 +19,9 @@ can't commit (game rips, licensed samples) a home that's never in git or a deplo
 ## Not chosen
 - Writing into `songs/`: committed, so no rips or private samples there.
 - A file picker / File System Access API: Chrome-only, and an agent can't see what the browser picked.
+
+## Addendum (2026-11-14): requests
+Requests from the app (**✦ Ask**) go through the same folder: `songs/local/.requests.json`, written
+by the dev server, claimed and finished by an agent through `pnpm song requests`. A file and a CLI,
+not a socket to the agent, so any agent that can run a command can serve them, and nothing is
+lost while none is running.

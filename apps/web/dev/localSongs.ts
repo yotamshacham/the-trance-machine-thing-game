@@ -7,6 +7,7 @@ import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import type { Plugin } from 'vite';
 import { parseSong, stringifySong } from '@ttm/song';
+import { REQUESTS_FILE, addRequest, readRequests, writeRequests, type Request } from './requests.ts';
 
 /** The song file a request path names, or undefined if it isn't a plain `name.json` in the folder. */
 export function localSongFile(path: string): string | undefined {
@@ -21,8 +22,10 @@ export function localSongs(dir: string): Plugin {
     configureServer(server) {
       mkdirSync(dir, { recursive: true });
       server.watcher.add(dir);
+      const requestsPath = join(dir, REQUESTS_FILE);
       const changed = (path: string) => {
-        if (dirname(path) !== dir || !path.endsWith('.json')) return;
+        if (path === requestsPath) return server.ws.send({ type: 'custom', event: 'local-requests:changed', data: {} });
+        if (dirname(path) !== dir || !localSongFile(basename(path))) return;
         server.ws.send({ type: 'custom', event: 'local-songs:changed', data: { file: basename(path) } });
       };
       server.watcher.on('add', changed);
@@ -37,6 +40,23 @@ export function localSongs(dir: string): Plugin {
           res.end(JSON.stringify(body));
         };
         const path = req.url ?? '/';
+        if (path === '/requests' && req.method === 'GET') return send(200, { requests: readRequests(requestsPath) });
+        if (path === '/requests' && req.method === 'POST') {
+          let body = '';
+          req.on('data', (chunk: Buffer) => (body += chunk.toString()));
+          req.on('end', () => {
+            try {
+              const ask = JSON.parse(body) as Pick<Request, 'file' | 'target' | 'text'>;
+              if (!localSongFile(ask.file)) throw new Error(`"${ask.file}" is not a songs/local file`);
+              const list = addRequest(readRequests(requestsPath), ask, Date.now(), `r${Date.now().toString(36)}`);
+              writeRequests(requestsPath, list);
+              send(200, list.at(-1));
+            } catch (e) {
+              send(400, { error: (e as Error).message });
+            }
+          });
+          return;
+        }
         if (req.method === 'GET' && (path === '/' || path.startsWith('/?'))) {
           const songs = readdirSync(dir)
             .filter((f) => localSongFile(f))
