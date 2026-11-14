@@ -121,7 +121,9 @@ export class Engine {
     this.step = step;
     const transport = Tone.getTransport();
     this.repeatId = transport.scheduleRepeat((time) => this.tick(time), '16n');
-    transport.start('+0.05');
+    const at = Tone.now() + 0.05;
+    for (const s of this.strips.values()) s.voice.restart?.(at);
+    transport.start(at);
   }
 
   stop(): void {

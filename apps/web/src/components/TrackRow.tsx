@@ -6,6 +6,7 @@ import type { Ask } from '../requests.ts';
 import { AskClaude } from './AskClaude.tsx';
 import { SoundSelect } from './SoundSelect.tsx';
 import { StepGrid } from './StepGrid.tsx';
+import { SynthPanel } from './SynthPanel.tsx';
 
 interface Props {
   track: Track;
@@ -172,6 +173,9 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
               </button>
             ))}
           </div>
+        )}
+        {track.instrument.kind === 'synth' && (
+          <SynthPanel instrument={track.instrument} onChange={(instrument) => update({ instrument })} />
         )}
         <div className="track-line fx-line">
           {(

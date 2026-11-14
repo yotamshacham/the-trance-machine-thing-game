@@ -60,6 +60,13 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
   `wave` (`sawtooth square sine triangle`), `cutoff` Hz, `resonance`, `envAmount` (octaves the filter
   opens), `attack decay sustain release` seconds, `glide` seconds. `rolling-bass`, `acid` and `sub`
   are mono (slides work); the rest are polyphonic.
+- **Synth patch**: on top of the preset, a synth may set
+  - `filter` (`lowpass highpass bandpass notch`), `filterAttack`, `filterDecay`, `filterSustain`
+  - `unison` (1–16 stacked voices) and `detune` (their spread, cents)
+  - `noise`, `sub`, `drive` (0–1)
+  - `lfo`: up to two `{ "target": "cutoff"|"volume"|"pitch"|"pan", "rate": steps, "depth": 0–1,
+    "shape": "sine"|"square"|"triangle"|"sawtooth" }`. `rate` is one cycle in steps (1 = 16th,
+    4 = beat, 16 = bar), so it follows the tempo; LFOs restart with playback, in line with the bar.
 - `{"kind":"sampler","sample":url,"root":"C3","gate":false}`: plays an audio file, repitched from `root`.
   Without `gate` it plays the sample out; with it, it's cut at the note's length. Pitchless notes play `root`.
   - **Multisample**: `"sample": {"C1": url, "C#1": url, …}`, each file recorded at its note; a note

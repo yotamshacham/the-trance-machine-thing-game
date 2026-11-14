@@ -49,6 +49,21 @@ export const PatternInput = z.union([
 export const DRUM_VOICES = ['kick', 'clap', 'snare', 'closed-hat', 'open-hat', 'ride', 'perc', 'shaker'] as const;
 export const SYNTH_PRESETS = ['rolling-bass', 'acid', 'sub', 'pad', 'lead', 'pluck', 'supersaw', 'psy-pluck', 'square-lead', 'soft-saw'] as const;
 export const WAVES = ['sawtooth', 'square', 'sine', 'triangle'] as const;
+export const FILTER_TYPES = ['lowpass', 'highpass', 'bandpass', 'notch'] as const;
+export const LFO_TARGETS = ['cutoff', 'volume', 'pitch', 'pan'] as const;
+
+export const Lfo = z
+  .object({
+    target: z.enum(LFO_TARGETS).describe('cutoff: filter sweeps and wobbles; volume: a trance gate; pitch: vibrato; pan: left–right'),
+    rate: z
+      .number()
+      .min(0.25)
+      .max(256)
+      .describe('Length of one cycle in steps, so it follows the tempo: 1 = a 16th, 2 = an 8th, 4 = a beat, 16 = a bar'),
+    depth: z.number().min(0).max(1).describe('0–1: cutoff ±3 octaves at 1, volume down to silence, pitch ±1 semitone, pan fully left–right'),
+    shape: z.enum(WAVES).optional().describe('Default sine; square for a hard gate'),
+  })
+  .describe('A low-frequency oscillator, synced to the tempo and to the bar');
 
 export const DrumInstrument = z
   .object({
@@ -72,6 +87,16 @@ export const SynthInstrument = z
     sustain: z.number().min(0).max(1).optional(),
     release: z.number().min(0).max(10).optional().describe('Seconds'),
     glide: z.number().min(0).max(1).optional().describe('Portamento seconds for slid notes'),
+    filter: z.enum(FILTER_TYPES).optional().describe('Filter type, default lowpass'),
+    filterAttack: z.number().min(0).max(10).optional().describe('Seconds the filter envelope takes to open'),
+    filterDecay: z.number().min(0).max(10).optional().describe('Seconds it takes to fall back to filterSustain: the pluck'),
+    filterSustain: z.number().min(0).max(1).optional().describe('How open the filter stays while the note holds, 0–1'),
+    unison: z.number().int().min(1).max(16).optional().describe('Stacked detuned oscillators per note: width (supersaws ~7)'),
+    detune: z.number().min(0).max(100).optional().describe('Spread of the unison voices in cents'),
+    noise: z.number().min(0).max(1).optional().describe('White noise mixed in, shaped by the volume envelope'),
+    sub: z.number().min(0).max(1).optional().describe('A sine at the note’s pitch underneath, for weight'),
+    drive: z.number().min(0).max(1).optional().describe('Saturation after the filter: grit'),
+    lfo: z.array(Lfo).max(2).optional(),
   })
   .describe('Subtractive synth. Preset gives the sound; the other fields override it.');
 
@@ -167,6 +192,9 @@ export type DrumInstrument = z.infer<typeof DrumInstrument>;
 export type SynthInstrument = z.infer<typeof SynthInstrument>;
 export type SamplerInstrument = z.infer<typeof SamplerInstrument>;
 export type Instrument = z.infer<typeof Instrument>;
+export type Lfo = z.infer<typeof Lfo>;
+export type LfoTarget = (typeof LFO_TARGETS)[number];
+export type FilterType = (typeof FILTER_TYPES)[number];
 export type Track = z.infer<typeof Track>;
 export type TrackInput = z.infer<typeof TrackInput>;
 export type Section = z.infer<typeof Section>;

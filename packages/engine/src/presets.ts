@@ -1,7 +1,7 @@
 // What each drum voice and synth preset sounds like, as plain numbers. voices.ts builds Tone
 // nodes from these; tuning a sound means changing a row here.
 
-import type { DrumInstrument, DrumVoice, SynthInstrument, SynthPreset } from '@ttm/song';
+import { stepSeconds, type DrumInstrument, type DrumVoice, type FilterType, type Lfo, type SynthInstrument, type SynthPreset } from '@ttm/song';
 
 export type Wave = NonNullable<SynthInstrument['wave']>;
 
@@ -24,6 +24,13 @@ export interface SynthSettings {
   release: number;
   /** seconds the filter takes to close after opening: the "pluck" */
   filterDecay: number;
+  filterType: FilterType;
+  filterAttack: number;
+  /** how open the filter stays while a note holds, 0–1 of the envelope */
+  filterSustain: number;
+  /** white noise level, shaped by the volume envelope */
+  noise: number;
+  lfos: Lfo[];
   /** level of a sine at the same pitch under the oscillator, for low-end weight (0 = none) */
   sub: number;
   /** saturation after the filter, 0–1 (0 = clean): grit for acid */
@@ -36,36 +43,42 @@ export interface SynthSettings {
 export const SYNTH_PRESETS: Record<SynthPreset, SynthSettings> = {
   // short, plucky 16ths that sit between the kicks
   // a full 16th of body, a fast filter pluck on top, a sine underneath for weight
-  'rolling-bass': { mono: true, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 110, resonance: 3, envAmount: 4, attack: 0.002, decay: 0.12, sustain: 0.55, release: 0.025, filterDecay: 0.07, sub: 0.7, drive: 0, accent: 0, glide: 0.04 },
+  'rolling-bass': { mono: true, wave: 'sawtooth', fat: false, voices: 1, spread: 24, cutoff: 110, resonance: 3, envAmount: 4, attack: 0.002, decay: 0.12, sustain: 0.55, release: 0.025, filterDecay: 0.07, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0.7, drive: 0, accent: 0, glide: 0.04 },
   // a 303-ish line: a resonant filter that snaps shut, opened further by accents, then some grit
-  acid: { mono: true, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 280, resonance: 8, envAmount: 3, attack: 0.002, decay: 0.2, sustain: 0.25, release: 0.04, filterDecay: 0.16, sub: 0, drive: 0.4, accent: 1.5, glide: 0.07 },
-  sub: { mono: true, wave: 'sine', fat: false, voices: 3, spread: 24, cutoff: 400, resonance: 0.5, envAmount: 0, attack: 0.005, decay: 0.2, sustain: 0.9, release: 0.08, filterDecay: 0.2, sub: 0, drive: 0, accent: 0, glide: 0.05 },
-  pad: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 1400, resonance: 1, envAmount: 0.5, attack: 1.2, decay: 1, sustain: 0.7, release: 2.5, filterDecay: 1, sub: 0, drive: 0, accent: 0, glide: 0 },
-  lead: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 2600, resonance: 3, envAmount: 1.5, attack: 0.01, decay: 0.25, sustain: 0.6, release: 0.3, filterDecay: 0.25, sub: 0, drive: 0, accent: 0, glide: 0 },
+  acid: { mono: true, wave: 'sawtooth', fat: false, voices: 1, spread: 24, cutoff: 280, resonance: 8, envAmount: 3, attack: 0.002, decay: 0.2, sustain: 0.25, release: 0.04, filterDecay: 0.16, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0.4, accent: 1.5, glide: 0.07 },
+  sub: { mono: true, wave: 'sine', fat: false, voices: 1, spread: 24, cutoff: 400, resonance: 0.5, envAmount: 0, attack: 0.005, decay: 0.2, sustain: 0.9, release: 0.08, filterDecay: 0.2, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0.05 },
+  pad: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 1400, resonance: 1, envAmount: 0.5, attack: 1.2, decay: 1, sustain: 0.7, release: 2.5, filterDecay: 1, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0 },
+  lead: { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 24, cutoff: 2600, resonance: 3, envAmount: 1.5, attack: 0.01, decay: 0.25, sustain: 0.6, release: 0.3, filterDecay: 0.25, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0 },
   // a wide, bright lead: seven detuned saws
-  supersaw: { mono: false, wave: 'sawtooth', fat: true, voices: 7, spread: 45, cutoff: 5000, resonance: 1, envAmount: 1, attack: 0.005, decay: 0.3, sustain: 0.7, release: 0.35, filterDecay: 0.3, sub: 0, drive: 0, accent: 0, glide: 0 },
+  supersaw: { mono: false, wave: 'sawtooth', fat: true, voices: 7, spread: 45, cutoff: 5000, resonance: 1, envAmount: 1, attack: 0.005, decay: 0.3, sustain: 0.7, release: 0.35, filterDecay: 0.3, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0 },
   // short and squelchy, for 16th-note lines: a resonant filter snapping shut
-  'psy-pluck': { mono: false, wave: 'sawtooth', fat: false, voices: 3, spread: 24, cutoff: 900, resonance: 6, envAmount: 3.5, attack: 0.001, decay: 0.14, sustain: 0, release: 0.12, filterDecay: 0.12, sub: 0, drive: 0, accent: 0, glide: 0 },
+  'psy-pluck': { mono: false, wave: 'sawtooth', fat: false, voices: 1, spread: 24, cutoff: 900, resonance: 6, envAmount: 3.5, attack: 0.001, decay: 0.14, sustain: 0, release: 0.12, filterDecay: 0.12, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0 },
   // the NES pulse, thickened a touch
-  'square-lead': { mono: false, wave: 'square', fat: true, voices: 2, spread: 8, cutoff: 4000, resonance: 1, envAmount: 0.5, attack: 0.003, decay: 0.1, sustain: 0.8, release: 0.08, filterDecay: 0.1, sub: 0, drive: 0, accent: 0, glide: 0 },
+  'square-lead': { mono: false, wave: 'square', fat: true, voices: 2, spread: 8, cutoff: 4000, resonance: 1, envAmount: 0.5, attack: 0.003, decay: 0.1, sustain: 0.8, release: 0.08, filterDecay: 0.1, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0 },
   // a slower, darker saw for breakdowns
-  'soft-saw': { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 20, cutoff: 1500, resonance: 0.7, envAmount: 0.8, attack: 0.04, decay: 0.4, sustain: 0.6, release: 0.6, filterDecay: 0.4, sub: 0, drive: 0, accent: 0, glide: 0 },
-  pluck: { mono: false, wave: 'square', fat: false, voices: 3, spread: 24, cutoff: 1800, resonance: 2, envAmount: 2, attack: 0.002, decay: 0.22, sustain: 0, release: 0.2, filterDecay: 0.22, sub: 0, drive: 0, accent: 0, glide: 0 },
+  'soft-saw': { mono: false, wave: 'sawtooth', fat: true, voices: 3, spread: 20, cutoff: 1500, resonance: 0.7, envAmount: 0.8, attack: 0.04, decay: 0.4, sustain: 0.6, release: 0.6, filterDecay: 0.4, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0 },
+  pluck: { mono: false, wave: 'square', fat: false, voices: 1, spread: 24, cutoff: 1800, resonance: 2, envAmount: 2, attack: 0.002, decay: 0.22, sustain: 0, release: 0.2, filterDecay: 0.22, filterType: 'lowpass', filterAttack: 0, filterSustain: 0, noise: 0, lfos: [], sub: 0, drive: 0, accent: 0, glide: 0 },
 };
 
-/** A preset with the instrument's own overrides on top. */
+/** A preset with the instrument's own patch on top. */
 export function synthSettings(instrument: SynthInstrument): SynthSettings {
   const base = SYNTH_PRESETS[instrument.preset];
   const pick = <K extends keyof SynthSettings>(k: K): SynthSettings[K] =>
     (instrument as Partial<SynthSettings>)[k] ?? base[k];
+  const voices = instrument.unison ?? (base.fat ? base.voices : 1);
   return {
     mono: base.mono,
-    fat: base.fat,
-    voices: base.voices,
-    spread: base.spread,
-    filterDecay: base.filterDecay,
-    sub: base.sub,
-    drive: base.drive,
+    fat: voices > 1,
+    voices: Math.max(voices, 1),
+    spread: instrument.detune ?? base.spread,
+    filterDecay: pick('filterDecay'),
+    filterType: instrument.filter ?? base.filterType,
+    filterAttack: pick('filterAttack'),
+    filterSustain: pick('filterSustain'),
+    noise: pick('noise'),
+    lfos: instrument.lfo ?? base.lfos,
+    sub: pick('sub'),
+    drive: pick('drive'),
     accent: base.accent,
     wave: pick('wave'),
     cutoff: pick('cutoff'),
@@ -124,3 +137,29 @@ export function drumSettings(instrument: DrumInstrument): DrumSettings {
 
 /** Seconds a loop note fades in and out over, so its edges don't click. */
 export const LOOP_FADE = 0.008;
+
+export interface LfoRange {
+  /** cycles a second at this tempo */
+  hz: number;
+  /** what it swings between: Hz for cutoff, gain for volume, cents for pitch, -1…1 for pan */
+  min: number;
+  max: number;
+  shape: NonNullable<Lfo['shape']>;
+}
+
+/** An LFO's speed at this tempo and the range it swings what it targets through. */
+export function lfoRange(lfo: Lfo, cutoff: number, bpm: number): LfoRange {
+  const hz = 1 / (lfo.rate * stepSeconds(bpm));
+  const d = lfo.depth;
+  const shape = lfo.shape ?? 'sine';
+  switch (lfo.target) {
+    case 'cutoff':
+      return { hz, min: Math.max(20, cutoff * 2 ** (-3 * d)), max: Math.min(20000, cutoff * 2 ** (3 * d)), shape };
+    case 'volume':
+      return { hz, min: 1 - d, max: 1, shape };
+    case 'pitch':
+      return { hz, min: -100 * d, max: 100 * d, shape };
+    case 'pan':
+      return { hz, min: -d, max: d, shape };
+  }
+}

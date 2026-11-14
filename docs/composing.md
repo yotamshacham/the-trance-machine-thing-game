@@ -28,6 +28,12 @@ defaults, not rules; when the user asks for something else, do that.
 - Leads: `supersaw` for big moments, `psy-pluck` for 16th lines, `square-lead` for chip tunes,
   `soft-saw` for breakdowns.
 
+## Synth patches
+- **Trance gate** on a pad or chord: `"lfo": [{"target": "volume", "rate": 1, "depth": 1, "shape": "square"}]`.
+- **Sweep** over a phrase: `{"target": "cutoff", "rate": 64, "depth": 0.6, "shape": "triangle"}` (4 bars).
+- **Supersaw**: `unison` 7–9, `detune` 35–50; **acid**: mono preset `acid`, `resonance` 5–9, accents (`vel` 1).
+- **Wobble/rolling motion** on a bass: cutoff LFO at `rate` 2–4, small depth (0.2–0.3).
+
 ## Arrangement
 Phrases are 8 or 16 bars; change something every 8. A typical full-on track (~7–9 min):
 intro (kick + hats, 32) → build (bass in, 16) → drop (everything, 32) → breakdown (no kick,

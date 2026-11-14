@@ -43,6 +43,14 @@ _Avoid_: wet, amount
 A track's volume dipping each time the ducking track (the kick, by default) hits, then recovering.
 _Avoid_: sidechain (the studio technique it imitates), pump
 
+**Patch**:
+A synth's settings beyond its preset: oscillator stack, filter, envelopes, extras and LFOs.
+_Avoid_: preset (the named starting point a patch builds on)
+
+**LFO**:
+A slow, tempo-synced cycle that moves one thing in a patch (cutoff, volume, pitch or pan).
+_Avoid_: modulator, wobble
+
 **Part**:
 A group of tracks in the editor by their role in the mix: kick & bass, drums, leads, pads & FX.
 _Avoid_: bus, folder
