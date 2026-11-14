@@ -9,7 +9,7 @@ interface Props {
   /** the section sounding now, or -1 */
   playingSection: number;
   dispatch(action: Action): void;
-  /** send a request about a section, or the song, to the agent (only with a linked song) */
+  /** send a request about the section to the agent (only with a linked song) */
   ask: Ask | undefined;
 }
 
@@ -56,8 +56,7 @@ export function Arrangement({ song, selected, playingSection, dispatch, ask }: P
         <button onClick={() => dispatch({ type: 'add-section' })} title="Add a copy of this section after it">+ Duplicate</button>
         <button onClick={() => dispatch({ type: 'remove-section' })} disabled={song.arrangement.length === 1}>Remove</button>
         <span className="muted-text">{totalBars} bars in all</span>
-        <AskClaude ask={ask} target={{ kind: 'section', index: selected, name: section.name }} about={`section “${section.name}”`} />
-        <AskClaude ask={ask} target={{ kind: 'song' }} about="the whole song" />
+        <AskClaude ask={ask} target={{ kind: 'section', index: selected, name: section.name }} about={`section “${section.name}”`} label="Ask about this section" />
       </div>
     </section>
   );

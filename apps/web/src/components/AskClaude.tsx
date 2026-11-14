@@ -6,10 +6,12 @@ interface Props {
   target: RequestTarget;
   /** what the request is about, for the placeholder */
   about: string;
+  /** the button's text: say what it asks about when that isn't obvious from where it sits */
+  label?: string;
 }
 
 /** A button that opens a one-line request to the agent about a track, a section or the song. */
-export function AskClaude({ ask, target, about }: Props) {
+export function AskClaude({ ask, target, about, label = 'Ask' }: Props) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [error, setError] = useState<string>();
@@ -27,7 +29,7 @@ export function AskClaude({ ask, target, about }: Props) {
   if (!open) {
     return (
       <button className="ask-button" onClick={() => setOpen(true)} title={`Ask Claude to change ${about}`}>
-        ✦ Ask
+        ✦ {label}
       </button>
     );
   }

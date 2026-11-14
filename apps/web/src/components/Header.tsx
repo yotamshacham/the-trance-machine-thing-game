@@ -4,6 +4,8 @@ import { useRef } from 'react';
 import { downloadJson, downloadMidi, openSongFile } from '../files.ts';
 import { bundledSongs } from '../songs.ts';
 import type { LocalSong } from '../localSongs.ts';
+import type { Ask } from '../requests.ts';
+import { AskClaude } from './AskClaude.tsx';
 import type { Action } from '../state.ts';
 
 export type LoopMode = 'section' | 'song';
@@ -27,9 +29,11 @@ interface Props {
   onSaveToProject(): void;
   /** a song not from songs/local was loaded */
   onUnlink(): void;
+  /** send a request about the whole song to the agent (only with a linked song) */
+  ask: Ask | undefined;
 }
 
-export function Header({ song, playing, loopMode, canUndo, canRedo, dispatch, onPlay, onStop, onLoopMode, onError, localSongs, linked, onOpenLocal, onSaveToProject, onUnlink }: Props) {
+export function Header({ song, playing, loopMode, canUndo, canRedo, dispatch, onPlay, onStop, onLoopMode, onError, localSongs, linked, onOpenLocal, onSaveToProject, onUnlink, ask }: Props) {
   const fileInput = useRef<HTMLInputElement>(null);
   return (
     <header className="header">
@@ -59,6 +63,7 @@ export function Header({ song, playing, loopMode, canUndo, canRedo, dispatch, on
         </label>
       </div>
       <input className="title" value={song.title} onChange={(e) => dispatch({ type: 'set-title', title: e.target.value })} aria-label="Song title" />
+      <AskClaude ask={ask} target={{ kind: 'song' }} about="the whole song" label="Ask about the song" />
       <div className="file-actions">
         <button onClick={() => dispatch({ type: 'undo' })} disabled={!canUndo} title="Undo (⌘Z)">↶</button>
         <button onClick={() => dispatch({ type: 'redo' })} disabled={!canRedo} title="Redo (⇧⌘Z)">↷</button>

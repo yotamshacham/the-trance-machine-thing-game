@@ -100,6 +100,7 @@ export function App({ initial }: { initial: Song }) {
         onOpenLocal={local.open}
         onSaveToProject={() => void local.saveToProject()}
         onUnlink={local.unlink}
+        ask={ask}
       />
       {error && (
         <div className="error" role="alert">
