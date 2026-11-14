@@ -8,12 +8,14 @@ interface Props {
   about: string;
   /** the button's text: say what it asks about when that isn't obvious from where it sits */
   label?: string;
+  /** a small ✦ that fits in a line of other controls; its form opens on a line of its own */
+  compact?: boolean;
 }
 
 const RECENT_MS = 60_000;
 
 /** A button that opens a one-line request to the agent about a track, a section or the song. */
-export function AskClaude({ ask, target, about, label = 'Ask' }: Props) {
+export function AskClaude({ ask, target, about, label = 'Ask', compact = false }: Props) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [error, setError] = useState<string>();
@@ -43,19 +45,20 @@ export function AskClaude({ ask, target, about, label = 'Ask' }: Props) {
   if (!open) {
     if (busy) {
       return (
-        <span className="ask-status working" title={latest!.text}>
-          ✦ {latest!.status === 'pending' ? 'waiting for Claude…' : 'Claude is working…'}
+        <span className="ask-status working" title={`${latest!.text}: ${latest!.status === 'pending' ? 'waiting for Claude' : 'Claude is working on it'}`}>
+          ✦ {compact ? '…' : latest!.status === 'pending' ? 'waiting for Claude…' : 'Claude is working…'}
         </span>
       );
     }
     return (
       <span className="ask-line">
-        <button className="ask-button" onClick={() => setOpen(true)} title={`Ask Claude to change ${about}`}>
-          ✦ {label}
+        <button className={`ask-button ${compact ? 'compact' : ''}`} onClick={() => setOpen(true)} title={`Ask Claude to change ${about}`} aria-label={`Ask Claude about ${about}`}>
+          ✦{compact ? '' : ` ${label}`}
         </button>
         {recent && (
           <span className={`ask-status ${latest!.status}`} title={latest!.reply}>
-            {latest!.status === 'done' ? '✓ done' : "✗ couldn't"}: {latest!.reply}
+            {latest!.status === 'done' ? '✓' : '✗'}
+            {compact ? '' : ` ${latest!.status === 'done' ? 'done' : "couldn't"}: ${latest!.reply}`}
           </span>
         )}
       </span>
@@ -63,7 +66,7 @@ export function AskClaude({ ask, target, about, label = 'Ask' }: Props) {
   }
   return (
     <form
-      className="ask-form"
+      className={`ask-form ${compact ? 'compact' : ''}`}
       onSubmit={(e) => {
         e.preventDefault();
         void send();

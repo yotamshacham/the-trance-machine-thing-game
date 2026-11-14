@@ -73,6 +73,7 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
           </button>
           <input className="track-name" value={track.name} onChange={(e) => update({ name: e.target.value })} aria-label="Track name" />
           {folded && <span className="track-sound" title={soundName}>{soundName}</span>}
+          <AskClaude ask={ask} target={{ kind: 'track', trackId: track.id, name: track.name }} about={track.name} compact />
           <button className="icon" onClick={() => dispatch({ type: 'remove-track', trackId: track.id })} title="Remove track (undo brings it back)">
             ×
           </button>
@@ -193,11 +194,6 @@ export function TrackRow({ track, patternId, playing, solo, pen, banks, dispatch
             </label>
           ))}
         </div>
-        {ask && (
-          <div className="track-line">
-            <AskClaude ask={ask} target={{ kind: 'track', trackId: track.id, name: track.name }} about={track.name} />
-          </div>
-        )}
       </div>
       {pattern ? (
         <StepGrid

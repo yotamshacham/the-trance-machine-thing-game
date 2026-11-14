@@ -620,3 +620,17 @@ button.icon.fold {
 .track.folded .silent {
   font-size: 12px;
 }
+
+.track-head > .track-line:first-child {
+  flex-wrap: wrap;
+}
+
+.ask-button.compact {
+  padding: 2px 7px;
+}
+
+/* a compact ✦'s form takes a line of its own under the track's first line */
+.ask-form.compact {
+  flex-basis: 100%;
+  order: 10;
+}
