@@ -34,6 +34,12 @@ defaults, not rules; when the user asks for something else, do that.
 - **Supersaw**: `unison` 7–9, `detune` 35–50; **acid**: mono preset `acid`, `resonance` 5–9, accents (`vel` 1).
 - **Wobble/rolling motion** on a bass: cutoff LFO at `rate` 2–4, small depth (0.2–0.3).
 
+## Fills
+Every 8 bars, the last bar can be a fill: the kick and bass patterns change in that bar (no kick or a
+light one, a bass variation), and a riser (`noise-rise`, one note at step 112, `len` 16) can build into
+the next bar. Name fill tracks "… fill" and the editor groups them under Fills. Noise riser (`noise` + `swell`), a snare
+roll speeding up 8ths → 16ths with rising `vel`, or a pad swell.
+
 ## Arrangement
 Phrases are 8 or 16 bars; change something every 8. A typical full-on track (~7–9 min):
 intro (kick + hats, 32) → build (bass in, 16) → drop (everything, 32) → breakdown (no kick,

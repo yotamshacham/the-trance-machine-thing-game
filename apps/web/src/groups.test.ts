@@ -66,4 +66,9 @@ describe('parts: which group a track belongs to', () => {
       ['leads', 'Leads', ['lead']],
     ]);
   });
+
+  it('a track named as a fill sits under Fills', () => {
+    expect(partOf(track('kf', { kind: 'drum', voice: 'kick' }, 'Kick fill'), banks)).toBe('fills');
+    expect(partOf(track('nr', { kind: 'synth', preset: 'noise-rise' }, 'Noise rise fill'), banks)).toBe('fills');
+  });
 });

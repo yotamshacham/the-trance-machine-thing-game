@@ -43,6 +43,10 @@ _Avoid_: wet, amount
 A track's volume dipping each time the ducking track (the kick, by default) hits, then recovering.
 _Avoid_: sidechain (the studio technique it imitates), pump
 
+**Fill**:
+A short break that announces what comes next, usually the last bar of 8: the kick and bass patterns change, often with a riser.
+
+
 **Patch**:
 A synth's settings beyond its preset: oscillator stack, filter, envelopes, extras and LFOs.
 _Avoid_: preset (the named starting point a patch builds on)

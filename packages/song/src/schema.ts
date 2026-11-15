@@ -47,7 +47,7 @@ export const PatternInput = z.union([
 ]);
 
 export const DRUM_VOICES = ['kick', 'clap', 'snare', 'closed-hat', 'open-hat', 'ride', 'perc', 'shaker'] as const;
-export const SYNTH_PRESETS = ['rolling-bass', 'acid', 'sub', 'pad', 'lead', 'pluck', 'supersaw', 'psy-pluck', 'square-lead', 'soft-saw'] as const;
+export const SYNTH_PRESETS = ['rolling-bass', 'acid', 'sub', 'pad', 'lead', 'pluck', 'supersaw', 'psy-pluck', 'square-lead', 'soft-saw', 'noise-rise'] as const;
 export const WAVES = ['sawtooth', 'square', 'sine', 'triangle'] as const;
 export const FILTER_TYPES = ['lowpass', 'highpass', 'bandpass', 'notch'] as const;
 export const LFO_TARGETS = ['cutoff', 'volume', 'pitch', 'pan'] as const;

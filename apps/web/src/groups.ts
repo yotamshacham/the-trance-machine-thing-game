@@ -4,13 +4,14 @@
 import type { Track } from '@ttm/song';
 import { findSound, type Bank } from './bank.ts';
 
-export type Part = 'kick-bass' | 'drums' | 'leads' | 'pads-fx' | 'other';
+export type Part = 'kick-bass' | 'drums' | 'leads' | 'pads-fx' | 'fills' | 'other';
 
 export const PARTS: { id: Part; name: string }[] = [
   { id: 'kick-bass', name: 'Kick & bass' },
   { id: 'drums', name: 'Drums' },
   { id: 'leads', name: 'Leads' },
   { id: 'pads-fx', name: 'Pads & FX' },
+  { id: 'fills', name: 'Fills' },
   { id: 'other', name: 'Other' },
 ];
 
@@ -24,6 +25,7 @@ const WORDS: [RegExp, Part][] = [
 const byWords = (text: string): Part | undefined => WORDS.find(([re]) => re.test(text))?.[1];
 
 export function partOf(track: Track, banks: Bank[]): Part {
+  if (/\bfill/i.test(track.name)) return 'fills';
   const inst = track.instrument;
   if (inst.kind === 'drum') return inst.voice === 'kick' ? 'kick-bass' : 'drums';
   if (inst.kind === 'synth') {

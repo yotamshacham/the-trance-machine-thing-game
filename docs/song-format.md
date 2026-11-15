@@ -56,7 +56,8 @@ Saving writes a pattern as a grid whenever the grid says it exactly (`pnpm song 
 - `{"kind":"drum","voice":…}`: the drum machine, synthesized. Voices: `kick clap snare closed-hat
   open-hat ride perc shaker`. Optional `tune` (semitones), `decay` (multiplier).
 - `{"kind":"synth","preset":…}`: presets `rolling-bass acid sub pad lead pluck supersaw psy-pluck
-  square-lead soft-saw`. Optional overrides:
+  square-lead soft-saw noise-rise`. `noise-rise` is a riser: noise only, rising from silence
+  over each note's length (one note `len` 16 rises across a bar). Optional overrides:
   `wave` (`sawtooth square sine triangle`), `cutoff` Hz, `resonance`, `envAmount` (octaves the filter
   opens), `attack decay sustain release` seconds, `glide` seconds. `rolling-bass`, `acid` and `sub`
   are mono (slides work); the rest are polyphonic.
